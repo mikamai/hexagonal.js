@@ -1,0 +1,41 @@
+{
+  "name": "hex_map",
+  "description": "Hexanogal Map for javascript",
+  "version": "0.0.1",
+  "homepage": "https://github.com/nicolaracco/hex_map",
+  "author": {
+    "name": "Nicola Racco",
+    "email": "nicola.racco@gmail.com",
+    "url": "https://github.com/nicolaracco"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nicolaracco/hex_map.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nicolaracco/hex_map/issues"
+  },
+  "main": "src",
+  "engines": {
+    "node": ">= 0.9.0"
+  },
+  "scripts": {
+    "test": "grunt"
+  },
+  "dependencies": {
+    "underscore": "~1.4"
+  },
+  "devDependencies": {
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-coffee": "~0.10.1",
+    "grunt-browserify": "*",
+    "grunt": "~0.4",
+    "grunt-cli": "~0.1.13",
+    "jasmine-node": "~1.14.3",
+    "grunt-contrib-jasmine": "*"
+  },
+  "keywords": [
+    "hex",
+    "map"
+  ]
+}
