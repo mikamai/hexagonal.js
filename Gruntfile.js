@@ -9,7 +9,7 @@ module.exports = function(grunt) {
       ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
     watch: {
       all: {
-        files: ['src/**/*.coffee', 'specs/**/*_spec.js'],
+        files: ['src/**/*.coffee', 'specs/**/*.coffee', 'gruntfile.js'],
         tasks: ['default'],
         options: {
           reload: true,
@@ -18,17 +18,29 @@ module.exports = function(grunt) {
       }
     },
     coffee: {
-      compile: {
+      app: {
         files: {
           'build/hexagonal.js': 'src/hexagonal.coffee'
+        }
+      },
+      test: {
+        files: {
+          'build/spec_helper.js': 'specs/spec_helper.coffee',
+          'build/specs.js'      : ['specs/**/*_spec.coffee']
+        },
+        options: {
+          bare: true,
+          join: true
         }
       }
     },
     jasmine: {
       src: "build/hexagonal.js",
       options: {
-        coffee: true,
-        specs: 'specs/**/*_spec.js'
+        specs  : 'build/specs.js',
+        helpers: 'build/spec_helper.js',
+        display: 'short',
+        summary: true
       }
     }
   });
