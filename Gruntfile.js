@@ -47,6 +47,11 @@ module.exports = function(grunt) {
         display: 'short',
         summary: true
       }
+    },
+    clean: {
+      test: {
+        src: ['build/spec_helper.js', 'build/specs.js']
+      }
     }
   });
 
@@ -54,6 +59,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-coffeeify');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
-  grunt.registerTask('default', ['coffeeify', 'coffee', 'jasmine']);
+  grunt.registerTask('default', ['coffeeify', 'coffee', 'jasmine', 'clean']);
 };

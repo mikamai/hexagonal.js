@@ -33,7 +33,8 @@
     "grunt-cli": "~0.1.13",
     "jasmine-node": "~1.14.3",
     "grunt-contrib-jasmine": "*",
-    "grunt-coffeeify": "*"
+    "grunt-coffeeify": "*",
+    "grunt-contrib-clean": "*"
   },
   "keywords": [
     "hex",
