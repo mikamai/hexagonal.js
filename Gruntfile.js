@@ -17,12 +17,17 @@ module.exports = function(grunt) {
         }
       }
     },
-    coffee: {
-      app: {
-        files: {
-          'build/hexagonal.js': 'src/hexagonal.coffee'
-        }
+    coffeeify: {
+      options: {
+        debug: true
       },
+      hexagonal: {
+        files: [
+          {src: 'src/hexagonal/index.coffee', dest: 'build/hexagonal.js'}
+        ]
+      }
+    },
+    coffee: {
       test: {
         files: {
           'build/spec_helper.js': 'specs/spec_helper.coffee',
@@ -48,6 +53,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-coffeeify');
 
-  grunt.registerTask('default', ['coffee', 'jasmine']);
+  grunt.registerTask('default', ['coffeeify', 'coffee', 'jasmine']);
 };

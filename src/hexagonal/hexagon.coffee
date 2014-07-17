@@ -1,52 +1,7 @@
-@Hexagonal ?= {}
-
-class Hexagonal.Point
-  constructor: ->
-    attributes = @_extractAttributes(arguments)
-    @x = attributes.x ? 0
-    @y = attributes.y ? 0
-
-  isEqual: (other) ->
-    @toPrimitive() is (other.toPrimitive() ? other)
-
-  toPrimitive: => { x: @x, y: @y }
-
-  toString: => "#{@constructor.name} (#{@x}, #{@y})"
-
-  sum: ->
-    attributes = @_extractAttributes(arguments)
-    new @constructor @x + attributes.x, @y + attributes.y
-
-  sub: ->
-    attributes = @_extractAttributes(arguments)
-    new @constructor @x - attributes.x, @y - attributes.y
-
-  _extractAttributes: (args) ->
-    attributes = args[0] ? {}
-    if typeof(attributes) is 'number' || args.length > 1
-      attributes = { x: args[0], y: args[1] }
-    attributes
-
-class Hexagonal.Size
-  constructor: ->
-    attributes = arguments[0] ? {}
-    if typeof(attributes) is 'number' || arguments.length > 1
-      attributes = { width: arguments[0], height: arguments[1] }
-    @width  = attributes.width ? 0
-    @height = attributes.height ? 0
-
-class Hexagonal.Vertex extends Hexagonal.Point
-  constructor: ->
-    super
-    @edges = []
-
-class Hexagonal.Edge
-  constructor: (@va, @vb) ->
-    unless @va? and @vb?
-      throw new Error 'Two points have to be provided'
-    v.edges.push @ for v in @vertices()
-
-  vertices: -> [@va, @vb]
+Point  = require './core/point.coffee'
+Size   = require './core/size.coffee'
+Vertex = require './core/vertex.coffee'
+Edge   = require './core/edge.coffee'
 
 # Hexagon
 #
@@ -79,7 +34,7 @@ class Hexagonal.Edge
 #   new Hexagon radius: 5, precisionRound: 0  # no decimal digits
 #   new Hexagon radius: 5, precisionRound: 2  # two decimal digits
 #   new Hexagon radius: 5, precisionRound: -1 # no rounding
-class Hexagonal.Hexagon
+class Hexagon
   dimensionCoeff: Math.sqrt(3) / 2
   precisionRound: 1
 
@@ -102,27 +57,27 @@ class Hexagonal.Hexagon
 
   position: =>
     if @flatTop
-      new Hexagonal.Point @vertices[3].x, @vertices[4].y
+      new Point @vertices[3].x, @vertices[4].y
     else
-      new Hexagonal.Point @vertices[2].x, @vertices[4].y
+      new Point @vertices[2].x, @vertices[4].y
 
   size: =>
-    new Hexagonal.Size @vertices[0].x - @position().x, @vertices[1].y - @position().y
+    new Size @vertices[0].x - @position().x, @vertices[1].y - @position().y
 
   _initUsingCenterAndRadius: (center, radius) ->
-    center = new Hexagonal.Point center
+    center = new Point center
     prevAngle = null
     vertices = []
     for index in [0...6]
       angleMod = if @flatTop then 0 else 0.5
       angle = 2 * Math.PI / 6 * (index + angleMod)
-      vertices.push new Hexagonal.Vertex
+      vertices.push new Vertex
         x: @_round(center.x + radius * Math.cos(angle))
         y: @_round(center.y + radius * Math.sin(angle))
     @_initUsingVertices vertices
 
   _initUsingPositionAndSize: (position, size) ->
-    position = new Hexagonal.Point position
+    position = new Point position
     unless size.width? or size.height?
       throw new Error "Size must be provided with width or height or both"
     size = @_desumedSize size.width, size.height
@@ -134,41 +89,41 @@ class Hexagonal.Hexagon
 
   _buildPointyToppedVertices: (position, size) ->
     [
-      new Hexagonal.Vertex(position.sum size.width,       size.height * 0.75),
-      new Hexagonal.Vertex(position.sum size.width * 0.5, size.height),
-      new Hexagonal.Vertex(position.sum 0,                size.height * 0.75),
-      new Hexagonal.Vertex(position.sum 0,                size.height * 0.25),
-      new Hexagonal.Vertex(position.sum size.width * 0.5, 0),
-      new Hexagonal.Vertex(position.sum size.width,       size.height * 0.25)
+      new Vertex(position.sum size.width,       size.height * 0.75),
+      new Vertex(position.sum size.width * 0.5, size.height),
+      new Vertex(position.sum 0,                size.height * 0.75),
+      new Vertex(position.sum 0,                size.height * 0.25),
+      new Vertex(position.sum size.width * 0.5, 0),
+      new Vertex(position.sum size.width,       size.height * 0.25)
     ]
 
   _buildFlatToppedVertices: (position, size) ->
     [
-      new Hexagonal.Vertex(position.sum size.width,        size.height * 0.5),
-      new Hexagonal.Vertex(position.sum size.width * 0.75, size.height),
-      new Hexagonal.Vertex(position.sum size.width * 0.25, size.height),
-      new Hexagonal.Vertex(position.sum 0,                 size.height * 0.5),
-      new Hexagonal.Vertex(position.sum size.width * 0.25, 0),
-      new Hexagonal.Vertex(position.sum size.width * 0.75, 0)
+      new Vertex(position.sum size.width,        size.height * 0.5),
+      new Vertex(position.sum size.width * 0.75, size.height),
+      new Vertex(position.sum size.width * 0.25, size.height),
+      new Vertex(position.sum 0,                 size.height * 0.5),
+      new Vertex(position.sum size.width * 0.25, 0),
+      new Vertex(position.sum size.width * 0.75, 0)
     ]
 
   _desumedSize: (width, height) ->
     if width
       if @flatTop
-        new Hexagonal.Size width, height ? @_round(width * @dimensionCoeff)
+        new Size width, height ? @_round(width * @dimensionCoeff)
       else
-        new Hexagonal.Size width, height ? @_round(width / @dimensionCoeff)
+        new Size width, height ? @_round(width / @dimensionCoeff)
     else if height
       if @flatTop
-        new Hexagonal.Size @_round(height / @dimensionCoeff), height
+        new Size @_round(height / @dimensionCoeff), height
       else
-        new Hexagonal.Size @_round(height * @dimensionCoeff), height
+        new Size @_round(height * @dimensionCoeff), height
 
   _initUsingVertices: (vertices) ->
     throw new Error 'You have to provide 6 vertices' if vertices.length isnt 6
     edges = (for vertex, index in vertices when index > 0
-      new Hexagonal.Edge vertices[index - 1], vertex)
-    edges.push new Hexagonal.Edge vertices[5], vertices[0]
+      new Edge vertices[index - 1], vertex)
+    edges.push new Edge vertices[5], vertices[0]
     @_initUsingEdges(edges)
 
   _initUsingEdges: (@edges) ->
@@ -179,3 +134,5 @@ class Hexagonal.Hexagon
     return value if @precisionRound < 0
     precision = Math.pow 10, @precisionRound
     Math.round(value * precision) / precision
+
+module.exports = Hexagon
