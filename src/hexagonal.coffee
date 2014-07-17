@@ -11,6 +11,8 @@ class Hexagonal.Point
 
   toPrimitive: => { x: @x, y: @y }
 
+  toString: => "#{@constructor.name} (#{@x}, #{@y})"
+
   sum: ->
     attributes = @_extractAttributes(arguments)
     new @constructor @x + attributes.x, @y + attributes.y
@@ -62,10 +64,18 @@ class Hexagonal.Edge
 #   new Hexagon size: { width: 10, height: 10 } # with position placed in the origin
 #   new Hexagon position: { x: 1, y: 2}, size: { width: 10 } # height will be desumed
 #   new Hexagon position: { x: 1, y: 2}, size: { height: 10 } # width will be desumed
+#
+# When you create an hexagon you should always pass the flatTop option set to true if you want
+# the hexagon to be handled as flat topped.
+#
+# @example
+#   new Hexagon size: { width: 10, height: 10 } # creates a pointy topped hexagon
+#   new Hexagon size: { width: 10, height: 10 }, flatTop: true # creates a flat topped hexagon
 class Hexagonal.Hexagon
   dimensionCoeff: Math.sqrt(3) / 2
 
   constructor: (attributes = {}) ->
+    @flatTop = !!attributes.flatTop
     if attributes.radius?
       @_initUsingCenterAndRadius(attributes.center, attributes.radius)
     else if attributes.vertices?
@@ -77,22 +87,24 @@ class Hexagonal.Hexagon
     else
       throw new Error "You can build an hexagon providing the radius, or the vertices collection, or the edges collection, or the size"
 
-  vertices: => @_vertices
+  center: => @position().sum @size().width / 2, @size().height / 2
 
-  edges: => @_edges
+  position: =>
+    if @flatTop
+      new Hexagonal.Point @vertices[3].x, @vertices[4].y
+    else
+      new Hexagonal.Point @vertices[2].x, @vertices[4].y
 
-  center: => @_position.sum @_size.width / 2, @_size.height / 2
-
-  position: => @_position
-
-  size: => @_size
+  size: =>
+    new Hexagonal.Size @vertices[0].x - @position().x, @vertices[1].y - @position().y
 
   _initUsingCenterAndRadius: (center, radius) ->
     center = new Hexagonal.Point center
     prevAngle = null
     vertices = []
     for index in [0...6]
-      angle = 2 * Math.PI / 6 * (index + 0.5)
+      angleMod = if @flatTop then 0 else 0.5
+      angle = 2 * Math.PI / 6 * (index + angleMod)
       vertices.push new Hexagonal.Vertex
         x: @_round(center.x + radius * Math.cos(angle))
         y: @_round(center.y + radius * Math.sin(angle))
@@ -103,7 +115,14 @@ class Hexagonal.Hexagon
     unless size.width? or size.height?
       throw new Error "Size must be provided with width or height or both"
     size = @_desumedSize size.width, size.height
-    @_initUsingVertices [
+    vertices = if @flatTop
+      @_buildFlatToppedVertices(position, size)
+    else
+      @_buildPointyToppedVertices(position, size)
+    @_initUsingVertices vertices
+
+  _buildPointyToppedVertices: (position, size) ->
+    [
       new Hexagonal.Vertex(position.sum size.width,       size.height * 0.75),
       new Hexagonal.Vertex(position.sum size.width * 0.5, size.height),
       new Hexagonal.Vertex(position.sum 0,                size.height * 0.75),
@@ -112,11 +131,27 @@ class Hexagonal.Hexagon
       new Hexagonal.Vertex(position.sum size.width,       size.height * 0.25)
     ]
 
+  _buildFlatToppedVertices: (position, size) ->
+    [
+      new Hexagonal.Vertex(position.sum size.width,        size.height * 0.5),
+      new Hexagonal.Vertex(position.sum size.width * 0.75, size.height),
+      new Hexagonal.Vertex(position.sum size.width * 0.25, size.height),
+      new Hexagonal.Vertex(position.sum 0,                 size.height * 0.5),
+      new Hexagonal.Vertex(position.sum size.width * 0.25, 0),
+      new Hexagonal.Vertex(position.sum size.width * 0.75, 0)
+    ]
+
   _desumedSize: (width, height) ->
     if width
-      new Hexagonal.Size width, height ? @_round(width / @dimensionCoeff)
+      if @flatTop
+        new Hexagonal.Size width, height ? @_round(width * @dimensionCoeff)
+      else
+        new Hexagonal.Size width, height ? @_round(width / @dimensionCoeff)
     else if height
-      new Hexagonal.Size width ? @_round(height * @dimensionCoeff), height
+      if @flatTop
+        new Hexagonal.Size @_round(height / @dimensionCoeff), height
+      else
+        new Hexagonal.Size @_round(height * @dimensionCoeff), height
 
   _initUsingVertices: (vertices) ->
     throw new Error 'You have to provide 6 vertices' if vertices.length isnt 6
@@ -125,11 +160,9 @@ class Hexagonal.Hexagon
     edges.push new Hexagonal.Edge vertices[5], vertices[0]
     @_initUsingEdges(edges)
 
-  _initUsingEdges: (@_edges) ->
-    throw new Error 'You have to provide 6 edges' if @_edges.length isnt 6
-    @_vertices = (edge.va for edge in @_edges)
-    @_position = new Hexagonal.Point @_vertices[2].x, @_vertices[4].y
-    @_size = new Hexagonal.Size @_vertices[0].x - @_position.x, @_vertices[1].y - @_position.y
+  _initUsingEdges: (@edges) ->
+    throw new Error 'You have to provide 6 edges' if @edges.length isnt 6
+    @vertices = (edge.va for edge in @edges)
 
   _round: (value) ->
     Math.round(value * 10) / 10

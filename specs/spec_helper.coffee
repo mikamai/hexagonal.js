@@ -1,4 +1,5 @@
 beforeEach ->
+  Hexagonal.Point::jasmineToString = Hexagonal.Point::toString
   jasmine.addCustomEqualityTester (actual, expected) ->
     toPrimitive = (o) ->
       return o unless o?
