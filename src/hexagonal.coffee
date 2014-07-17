@@ -71,11 +71,22 @@ class Hexagonal.Edge
 # @example
 #   new Hexagon size: { width: 10, height: 10 } # creates a pointy topped hexagon
 #   new Hexagon size: { width: 10, height: 10 }, flatTop: true # creates a flat topped hexagon
+#
+# During its calculations, the Hexagon will round its values to one decimal digit by default.
+# You can change this behavior passing a precisionRound attribute:
+#
+# @example
+#   new Hexagon radius: 5, precisionRound: 0  # no decimal digits
+#   new Hexagon radius: 5, precisionRound: 2  # two decimal digits
+#   new Hexagon radius: 5, precisionRound: -1 # no rounding
 class Hexagonal.Hexagon
   dimensionCoeff: Math.sqrt(3) / 2
+  precisionRound: 1
 
   constructor: (attributes = {}) ->
     @flatTop = !!attributes.flatTop
+    @precisionRound = attributes.precisionRound
+    @precisionRound = 1 unless typeof @precisionRound is 'number'
     if attributes.radius?
       @_initUsingCenterAndRadius(attributes.center, attributes.radius)
     else if attributes.vertices?
@@ -165,4 +176,6 @@ class Hexagonal.Hexagon
     @vertices = (edge.va for edge in @edges)
 
   _round: (value) ->
-    Math.round(value * 10) / 10
+    return value if @precisionRound < 0
+    precision = Math.pow 10, @precisionRound
+    Math.round(value * precision) / precision
