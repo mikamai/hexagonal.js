@@ -4,12 +4,11 @@ class Point
     @x = attributes.x ? 0
     @y = attributes.y ? 0
 
-  isEqual: (other) ->
-    @toPrimitive() is (other.toPrimitive() ? other)
+  isEqual: (other) -> @x is other.x and @y is other.y
 
   toPrimitive: => { x: @x, y: @y }
 
-  toString: => "#{@constructor.name} (#{@x}, #{@y})"
+  toString: => "#{@constructor.name}(#{@x}, #{@y})"
 
   sum: ->
     attributes = @_extractAttributes(arguments)
@@ -22,7 +21,7 @@ class Point
   _extractAttributes: (args) ->
     attributes = args[0] ? {}
     if typeof(attributes) is 'number' || args.length > 1
-      attributes = { x: args[0], y: args[1] }
+      attributes = { x: args[0] ? 0, y: args[1] ? 0 }
     attributes
 
 module.exports = Point

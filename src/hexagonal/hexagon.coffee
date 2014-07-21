@@ -1,7 +1,12 @@
-Point  = require './core/point.coffee'
-Size   = require './core/size.coffee'
-Vertex = require './core/vertex.coffee'
-Edge   = require './core/edge.coffee'
+Point    = require './core/point.coffee'
+Size     = require './core/size.coffee'
+Vertex   = require './core/vertex.coffee'
+Edge     = require './core/edge.coffee'
+HalfEdge = require './core/half_edge.coffee'
+
+round = (value, precision = 1) ->
+  divider = Math.pow 10, precision
+  Math.round(value * divider) / divider
 
 # Hexagon
 #
@@ -35,104 +40,165 @@ Edge   = require './core/edge.coffee'
 #   new Hexagon radius: 5, precisionRound: 2  # two decimal digits
 #   new Hexagon radius: 5, precisionRound: -1 # no rounding
 class Hexagon
-  dimensionCoeff: Math.sqrt(3) / 2
-  precisionRound: 1
+  @sizeMultipliers:
+    pointly: [
+      { x: 1,   y: 0.75 },
+      { x: 0.5, y: 1 },
+      { x: 0,   y: 0.75 },
+      { x: 0,   y: 0.25 },
+      { x: 0.5, y: 0 },
+      { x: 1,   y: 0.25 }
+    ],
+    flat: [
+      { x: 1,    y: 0.5 },
+      { x: 0.75, y: 1 },
+      { x: 0.25, y: 1 },
+      { x: 0,    y: 0.5 },
+      { x: 0.25, y: 0 },
+      { x: 0.75, y: 0 }
+    ]
+  @dimensionCoeff: Math.sqrt(3) / 2
 
-  constructor: (attributes = {}) ->
-    @flatTop = !!attributes.flatTop
-    @precisionRound = attributes.precisionRound
-    @precisionRound = 1 unless typeof @precisionRound is 'number'
-    if attributes.radius?
-      @_initUsingCenterAndRadius(attributes.center, attributes.radius)
-    else if attributes.vertices?
-      @_initUsingVertices(attributes.vertices)
-    else if attributes.edges?
-      @_initUsingEdges(attributes.edges)
-    else if attributes.size?
-      @_initUsingPositionAndSize(attributes.position, attributes.size)
-    else
-      throw new Error "You can build an hexagon providing the radius, or the vertices collection, or the edges collection, or the size"
+  # Creates a regular Hexagon given its radius
+  # @param radius [Number] radius of the circle inscribing the hexagon
+  # @param attributes [Hash] Options to provide:
+  #   center: center of the hexagon
+  #   flatTop: whether to create a flat topped hexagon or not
+  #   position: position to set when the hexagon has been built
+  #   precision: Number of decimal digits to consider. Default is 1
+  @byRadius: (radius, attributes = {}) ->
+    center = new Point attributes.center
+    vertices = []
+    for index in [0...6]
+      angleMod = if attributes.flatTop then 0 else 0.5
+      angle    = 2 * Math.PI / 6 * (index + angleMod)
+      vertices.push new Vertex
+        x: round(center.x + radius * Math.cos(angle), attributes.precision)
+        y: round(center.y + radius * Math.sin(angle), attributes.precision)
+    @byVertices vertices, attributes
+
+  @_desumedSize: (size, flatTop, precision) ->
+    [width, height] = [size.width, size.height]
+    coeff = if flatTop then 1 / @dimensionCoeff else @dimensionCoeff
+    if width
+      new Size width, height ? round(width / coeff, precision)
+    else if height
+      new Size round(height * coeff, precision), height
+
+  # Creates an Hexagon given its size
+  # @param size [Size] Size to use to create the hexagon
+  #   If one of the size values (width or height) is not set, it will be
+  #   calculated using the other value, generating a regular hexagon
+  # @param attributes [Hash] Options to provide:
+  #   flatTop: whether to create a flat topped hexagon or not
+  #   position: position to set when the hexagon has been built
+  #   precision: Number of decimal digits to consider. Default is 1
+  @bySize: (size, attributes = {}) ->
+    unless size?.width? or size?.height?
+      throw new Error "Size must be provided with width or height or both"
+    size = @_desumedSize size, attributes.flatTop, attributes.precision
+    multipliers = @sizeMultipliers[if attributes.flatTop then 'flat' else 'pointly']
+    vertices = []
+    for multiplier in multipliers
+      vertices.push new Vertex
+        x: round(size.width  * multiplier.x, attributes.precision)
+        y: round(size.height * multiplier.y, attributes.precision)
+    @byVertices vertices, attributes
+
+  # Creates an Hexagon given its vertices
+  # @param vertices [Array<Vertex>] Collection of vertices
+  #   Vertices have to be ordered counterclockwise starting from the one at
+  #   0 degrees (in a flat topped hexagon), or 30 degrees (in a pointly topped hexagon)
+  # @param attributes [Hash] Options to provide:
+  #   flatTop: whether this is a flat topped hexagon or not
+  #   position: position to set when the hexagon has been built
+  #   precision: Number of decimal digits to consider. Default is 1
+  @byVertices: (vertices, attributes = {}) ->
+    throw new Error 'You have to provide 6 vertices' if vertices.length isnt 6
+    edges = (for vertex, index in vertices
+      nextVertex = vertices[index + 1] ? vertices[0]
+      new Edge [vertex, nextVertex])
+    @byEdges edges, attributes
+
+  # Creates an Hexagon given its edges
+  # @param edges [Array<Edge>] Collection of edges
+  #   Edges have to be ordered counterclockwise starting from the one with
+  #   the first vertex at 0 degrees (in a flat topped hexagon),
+  #   or 30 degrees (in a pointly topped hexagon)
+  # @param attributes [Hash] Options to provide:
+  #   flatTop: whether this is a flat topped hexagon or not
+  #   position: position to set when the hexagon has been built
+  #   precision: Number of decimal digits to consider. Default is 1
+  @byEdges: (edges, attributes = {}) ->
+    throw new Error 'You have to provide 6 edges' if edges.length isnt 6
+    halfEdges = (new HalfEdge(edge) for edge in edges)
+    new Hexagon halfEdges, attributes
+
+  precision: 1
+
+  constructor: (@halfEdges, attributes = {}) ->
+    throw new Error 'You have to provide 6 halfedges' if @halfEdges.length isnt 6
+    @flatTop   = !!attributes.flatTop
+    @precision = attributes.precision ? 1
+    @_setPosition attributes.position if attributes.position?
+    halfEdge.hexagon = @ for halfEdge in @halfEdges
+
+  vertices: => (halfEdge.va() for halfEdge in @halfEdges)
 
   center: => @position().sum @size().width / 2, @size().height / 2
 
-  position: =>
+  position: (value) =>
+    if value? then @_setPosition(value) else @_getPosition()
+
+  size: (value) =>
+    if value?
+      @_setSize value
+    else
+      @_getSize()
+
+  toString: => "#{@constructor.name} (#{@position().toString()}; #{@size().toString()})"
+
+  isEqual: (other) ->
+    return false if @vertices.length isnt (other.vertices?.length ? 0)
+    for v, index in @vertices
+      return false unless v.isEqual(other.vertices[index])
+    true
+
+  toPrimitive: => (v.toPrimitive() for v in @vertices)
+
+  _copyStartingVerticesFromEdges: (attributes) ->
+    attributes.vertices ?= []
+    for edge, index in attributes.edges when edge?
+      attributes.vertices[index]     ?= edge.va
+      attributes.vertices[index + 1] ?= edge.vb
+
+  _round: (value) -> round(value, @precision)
+
+  _getPosition: ->
+    vertices = @vertices()
     if @flatTop
-      new Point @vertices[3].x, @vertices[4].y
+      new Point vertices[3].x, vertices[4].y
     else
-      new Point @vertices[2].x, @vertices[4].y
+      new Point vertices[2].x, vertices[4].y
 
-  size: =>
-    new Size @vertices[0].x - @position().x, @vertices[1].y - @position().y
+  _setPosition: (value) ->
+    actual = @_getPosition()
+    for vertex in @vertices()
+      vertex.x = @_round(vertex.x - actual.x + value.x)
+      vertex.y = @_round(vertex.y - actual.y + value.y)
 
-  _initUsingCenterAndRadius: (center, radius) ->
-    center = new Point center
-    prevAngle = null
-    vertices = []
-    for index in [0...6]
-      angleMod = if @flatTop then 0 else 0.5
-      angle = 2 * Math.PI / 6 * (index + angleMod)
-      vertices.push new Vertex
-        x: @_round(center.x + radius * Math.cos(angle))
-        y: @_round(center.y + radius * Math.sin(angle))
-    @_initUsingVertices vertices
+  _getSize: ->
+    vertices = @vertices()
+    new Size
+      width : @_round Math.abs(vertices[0].x - @position().x)
+      height: @_round Math.abs(vertices[1].y - @position().y)
 
-  _initUsingPositionAndSize: (position, size) ->
-    position = new Point position
-    unless size.width? or size.height?
-      throw new Error "Size must be provided with width or height or both"
-    size = @_desumedSize size.width, size.height
-    vertices = if @flatTop
-      @_buildFlatToppedVertices(position, size)
-    else
-      @_buildPointyToppedVertices(position, size)
-    @_initUsingVertices vertices
-
-  _buildPointyToppedVertices: (position, size) ->
-    [
-      new Vertex(position.sum size.width,       size.height * 0.75),
-      new Vertex(position.sum size.width * 0.5, size.height),
-      new Vertex(position.sum 0,                size.height * 0.75),
-      new Vertex(position.sum 0,                size.height * 0.25),
-      new Vertex(position.sum size.width * 0.5, 0),
-      new Vertex(position.sum size.width,       size.height * 0.25)
-    ]
-
-  _buildFlatToppedVertices: (position, size) ->
-    [
-      new Vertex(position.sum size.width,        size.height * 0.5),
-      new Vertex(position.sum size.width * 0.75, size.height),
-      new Vertex(position.sum size.width * 0.25, size.height),
-      new Vertex(position.sum 0,                 size.height * 0.5),
-      new Vertex(position.sum size.width * 0.25, 0),
-      new Vertex(position.sum size.width * 0.75, 0)
-    ]
-
-  _desumedSize: (width, height) ->
-    if width
-      if @flatTop
-        new Size width, height ? @_round(width * @dimensionCoeff)
-      else
-        new Size width, height ? @_round(width / @dimensionCoeff)
-    else if height
-      if @flatTop
-        new Size @_round(height / @dimensionCoeff), height
-      else
-        new Size @_round(height * @dimensionCoeff), height
-
-  _initUsingVertices: (vertices) ->
-    throw new Error 'You have to provide 6 vertices' if vertices.length isnt 6
-    edges = (for vertex, index in vertices when index > 0
-      new Edge vertices[index - 1], vertex)
-    edges.push new Edge vertices[5], vertices[0]
-    @_initUsingEdges(edges)
-
-  _initUsingEdges: (@edges) ->
-    throw new Error 'You have to provide 6 edges' if @edges.length isnt 6
-    @vertices = (edge.va for edge in @edges)
-
-  _round: (value) ->
-    return value if @precisionRound < 0
-    precision = Math.pow 10, @precisionRound
-    Math.round(value * precision) / precision
+  _setSize: (value) ->
+    position = @_getPosition()
+    multipliers = if @flatTop then @flatTopSizeMultipliers else @sizeMultipliers
+    vertices = @vertices()
+    for multiplier, index in multipliers
+      vertices[index].x = @_round(position.x + value.width * multiplier.x)
+      vertices[index].y = @_round(position.y + value.height * multiplier.y)
 
 module.exports = Hexagon

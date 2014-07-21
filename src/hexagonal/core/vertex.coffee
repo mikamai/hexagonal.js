@@ -5,4 +5,7 @@ class Vertex extends Point
     super
     @edges = []
 
+  pushEdge: (edge) ->
+    @edges.push edge
+
 module.exports = Vertex

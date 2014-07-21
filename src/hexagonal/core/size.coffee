@@ -6,4 +6,11 @@ class Size
     @width  = attributes.width ? 0
     @height = attributes.height ? 0
 
+  isEqual: (other) ->
+    @toPrimitive() is (other.toPrimitive() ? other)
+
+  toPrimitive: => { width: @width, height: @height }
+
+  toString: => "#{@constructor.name} (#{@width}, #{@height})"
+
 module.exports = Size
