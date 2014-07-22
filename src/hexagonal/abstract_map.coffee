@@ -26,7 +26,14 @@ class Map
     throw new Error 'method not implemented'
 
   _createSampleHexagon: (attributes) =>
-    Hexagon.bySize attributes, @_hexagonAttributes(position: { x: 0, y: 0 }, precision: @precision)
+    options = @_hexagonAttributes(position: { x: 0, y: 0 }, precision: @precision)
+    if attributes.width? or attributes.height?
+      Hexagon.bySize attributes, options
+    else if attributes.radius?
+      Hexagon.byRadius attributes, options
+    else
+      givenKeys = (key for key of attributes).join ', '
+      throw new Error "Unknown Hexagon properties: #{givenKeys}"
 
   _round: (value) ->
     divider = Math.pow 10, @precision
