@@ -22,8 +22,11 @@ class Map
 
   at: (row, col) -> @_hexagons[@_indexInOffset row, col]
 
-  _createSampleHexagon: (attributes) =>
+  _hexagonAttributes: (attributes) ->
     throw new Error 'method not implemented'
+
+  _createSampleHexagon: (attributes) =>
+    Hexagon.bySize attributes, @_hexagonAttributes(position: { x: 0, y: 0 }, precision: @precision)
 
   _round: (value) ->
     divider = Math.pow 10, @precision
@@ -47,7 +50,7 @@ class Map
     halfEdges = new Array 6
     @_sharedEdgesFromNeighborsInOffset(row, col, halfEdges)
     @_createMissingHalfEdgesInOffset(row, col, halfEdges)
-    @_newHexagon halfEdges
+    new Hexagon halfEdges, @_hexagonAttributes(precision: @precision)
 
   _sharedVerticesFromNeighborsOfOffset: (row, col, vertices) ->
     throw new Error 'method not implemented'
@@ -79,8 +82,5 @@ class Map
     for vertex, index in vertices when not halfEdges[index]?
       nextVertex = vertices[index + 1] ? vertices[0]
       halfEdges[index] = new HalfEdge(new Edge vertex, nextVertex)
-
-  _newHexagon: (halfEdges) ->
-    throw new Error 'method not implemented'
 
 module.exports = Map
