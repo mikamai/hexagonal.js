@@ -12,28 +12,25 @@ class Map
   constructor: (attributes = {}) ->
     [@rows, @cols] = [attributes.rows, attributes.cols]
     @precision = attributes.precision ? 1
-    @_sample = Hexagon.bySize attributes.hexagon,
-      position : { x: 0, y: 0 }
-      precision: @precision
+    @_sample = @_createSampleHexagon attributes.hexagon
     @_hexagons = new Array(@rows * @cols)
     for row in [0...@rows]
       for col in [0...@cols]
         @_hexagons[@_indexInOffset(row, col)] = @_createHexagonInOffset(row, col)
-    delete @_sample
-    
+
   hexagons: -> @_hexagons
 
   at: (row, col) -> @_hexagons[@_indexInOffset row, col]
+
+  _createSampleHexagon: (attributes) =>
+    throw new Error 'method not implemented'
 
   _round: (value) ->
     divider = Math.pow 10, @precision
     Math.round(value * divider) / divider
 
   _expectedPositionInOffset: (row, col) ->
-    xMod = if row % 2 isnt 0 then @_sample.vertices()[1].x else 0
-    new Point
-      x: @_round(xMod + @_round(@_sample.size().width * col))
-      y: @_round(@_round(@_sample.size().height * 0.75) * row)
+    throw new Error 'method not implemented'
 
   _indexInOffset: (row, col) ->
     return null if col < 0 or row < 0 or col >= @cols or row >= @rows
@@ -50,21 +47,10 @@ class Map
     halfEdges = new Array 6
     @_sharedEdgesFromNeighborsInOffset(row, col, halfEdges)
     @_createMissingHalfEdgesInOffset(row, col, halfEdges)
-    new Hexagon halfEdges, precision: @precision
+    @_newHexagon halfEdges
 
   _sharedVerticesFromNeighborsOfOffset: (row, col, vertices) ->
-    @_sharedVerticesFromNeighbor vertices, @at(row, col - 1), 0: 2, 5: 3
-    @_sharedVerticesFromNeighbor vertices, @at(row, col + 1), 2: 0, 3: 5
-    if row % 2 is 0
-      @_sharedVerticesFromNeighbor vertices, @at(row - 1, col - 1), 1: 3, 0: 4
-      @_sharedVerticesFromNeighbor vertices, @at(row - 1, col), 2: 4, 1: 5
-      @_sharedVerticesFromNeighbor vertices, @at(row + 1, col - 1), 3: 1, 4: 0
-      @_sharedVerticesFromNeighbor vertices, @at(row + 1, col), 4: 2, 5: 1
-    else
-      @_sharedVerticesFromNeighbor vertices, @at(row - 1, col), 1: 3, 0: 4
-      @_sharedVerticesFromNeighbor vertices, @at(row - 1, col + 1), 2: 4, 1: 5
-      @_sharedVerticesFromNeighbor vertices, @at(row + 1, col), 3: 1, 4: 0
-      @_sharedVerticesFromNeighbor vertices, @at(row + 1, col + 1), 4: 2, 5: 1
+    throw new Error 'method not implemented'
 
   _sharedVerticesFromNeighbor: (vertices, neighbor, mapping) ->
     return unless neighbor?
@@ -80,18 +66,7 @@ class Map
         y: @_round(v.y + position.y)
 
   _sharedEdgesFromNeighborsInOffset: (row, col, halfEdges) ->
-    @_sharedEdgesFromNeighbor(halfEdges, @at(row, col - 1), 5: 2)
-    @_sharedEdgesFromNeighbor(halfEdges, @at(row, col + 1), 2: 5)
-    if row % 2 is 0
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row - 1, col - 1), 0: 3)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row + 1, col - 1), 3: 0)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row - 1, col), 1: 4)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row + 1, col), 4: 1)
-    else
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row - 1, col), 0: 3)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row + 1, col), 3: 0)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row - 1, col + 1), 1: 4)
-      @_sharedEdgesFromNeighbor(halfEdges, @at(row + 1, col + 1), 4: 1)
+    throw new Error 'method not implemented'
 
   _sharedEdgesFromNeighbor: (halfEdges, hexagon, mapping) ->
     return unless hexagon?
@@ -104,5 +79,8 @@ class Map
     for vertex, index in vertices when not halfEdges[index]?
       nextVertex = vertices[index + 1] ? vertices[0]
       halfEdges[index] = new HalfEdge(new Edge vertex, nextVertex)
+
+  _newHexagon: (halfEdges) ->
+    throw new Error 'method not implemented'
 
 module.exports = Map
