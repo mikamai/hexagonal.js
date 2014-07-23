@@ -17,16 +17,14 @@ class AbstractMap
     [@rows, @cols] = [attributes.rows, attributes.cols]
     @precision = attributes.precision ? 1
     @_sample = @_createSampleHexagon attributes.hexagon ? @_calcHexagonSize(attributes)
-    @_hexagons = new Array(@rows * @cols)
+    @hexagons = new Array(@rows * @cols)
     for row in [0...@rows]
       for col in [0...@cols]
-        @_hexagons[@_indexInOffset(row, col)] = @_createHexagonInOffset(row, col)
-
-  hexagons: -> @_hexagons
+        @hexagons[@_indexInOffset(row, col)] = @_createHexagonInOffset(row, col)
 
   size: -> throw new Error 'method not implemented'
 
-  at: (row, col) -> @_hexagons[@_indexInOffset row, col]
+  at: (row, col) -> @hexagons[@_indexInOffset row, col]
 
   _calcHexagonSize: (attributes) ->
     throw new Error 'method not implemented'

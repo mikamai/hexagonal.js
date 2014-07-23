@@ -15,14 +15,14 @@ itBehavesLikeAMap = (Subject, attributes) ->
   beforeEach -> subject = new Subject attributes
 
   it 'creates cols*rows hexagons', ->
-    expect(subject.hexagons().length).toEqual 30
+    expect(subject.hexagons.length).toEqual 30
 
   it 'each item in the hexagons collection is filled with an hexagon', ->
-    for hexagon in subject.hexagons()
+    for hexagon in subject.hexagons
       throw new Error index unless hexagon?
       expect(hexagon.constructor.name).toEqual 'Hexagon'
 
   it 'each hexagon has the same size', ->
-    firstHexagon = subject.hexagons()[0]
-    for hexagon, index in subject.hexagons() when index > 0
+    firstHexagon = subject.hexagons[0]
+    for hexagon, index in subject.hexagons when index > 0
       expect(hexagon.size()).toEqual firstHexagon.size()

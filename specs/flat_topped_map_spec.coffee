@@ -11,7 +11,7 @@ describe 'FlatToppedMap', ->
     beforeEach -> subject = new Subject attributes
 
     it 'each hexagon in an even column has the expected position', ->
-      for hexagon, index in subject.hexagons()
+      for hexagon, index in subject.hexagons
         [row, col] = [Math.floor(index / 5), index % 5]
         continue if col % 2 isnt 0
         expectedPosition = new Hexagonal.Point
@@ -20,7 +20,7 @@ describe 'FlatToppedMap', ->
         expect(hexagon.position()).toEqual expectedPosition
 
     it 'each hexagon in an odd column has the expected position', ->
-      for hexagon, index in subject.hexagons()
+      for hexagon, index in subject.hexagons
         [row, col] = [Math.floor(index / 5), index % 5]
         continue if col % 2 is 0
         expectedPosition = new Hexagonal.Point
@@ -29,7 +29,7 @@ describe 'FlatToppedMap', ->
         expect(hexagon.position()).toEqual expectedPosition
 
     it 'each hexagon on the same column shares two vertices with the previous one', ->
-      for hexagon, index in subject.hexagons()
+      for hexagon, index in subject.hexagons
         [row, col] = [Math.floor(index / 5), index % 5]
         continue if row is 0
         previousOne = subject.at row - 1, col
@@ -37,7 +37,7 @@ describe 'FlatToppedMap', ->
         expect(hexagon.vertices()[5]).toBe previousOne.vertices()[1]
 
     it 'each hexagon on the same column shares one edge with the previous one', ->
-      for hexagon, index in subject.hexagons()
+      for hexagon, index in subject.hexagons
         [row, col] = [Math.floor(index / 5), index % 5]
         continue if row is 0
         previousOne = subject.at row - 1, col
@@ -45,7 +45,7 @@ describe 'FlatToppedMap', ->
 
     describe 'each hexagon in an odd column', ->
       it 'shares two vertices with its neighbor in 0/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip even cols and first row
           continue if col % 2 is 0 or row is 0
@@ -56,7 +56,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
 
       it 'shares one edge with its neighbor in 0/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip even cols and first row
           continue if col % 2 is 0 or row is 0
@@ -65,7 +65,7 @@ describe 'FlatToppedMap', ->
 
     describe 'each hexagon in an even col', ->
       it 'shares two vertices with its neighbor in -1/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the first column and odd cols
           continue if row is 0 or col is 0 or col % 2 isnt 0
@@ -74,7 +74,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
 
       it 'shares two vertices with its neighbor in 0/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the first col and odd cols
           continue if row is 0 or col is 0 or col % 2 isnt 0
@@ -83,7 +83,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.vertices()[3]).toBe neighbor.vertices()[5]
 
       it 'shares two vertices with its neighbor in -1/+1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the last col and odd cols
           continue if row is 0 or col is 4 or col % 2 isnt 0
@@ -92,7 +92,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.vertices()[5]).toBe neighbor.vertices()[3]
 
       it 'shares one edge with its neighbor in -1/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the first col and odd cols
           continue if row is 0 or col is 0 or col % 2 isnt 0
@@ -100,7 +100,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.halfEdges[3].edge).toBe neighbor.halfEdges[0].edge
 
       it 'shares one edge with its neighbor in 0/-1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the first col and odd cols
           continue if row is 0 or col is 0 or col % 2 isnt 0
@@ -108,7 +108,7 @@ describe 'FlatToppedMap', ->
           expect(hexagon.halfEdges[2].edge).toBe neighbor.halfEdges[5].edge
 
       it 'shares one edge with its neighbor -1/+1', ->
-        for hexagon, index in subject.hexagons()
+        for hexagon, index in subject.hexagons
           [row, col] = [Math.floor(index / 5), index % 5]
           # skip the first row, the last col and odd cols
           continue if row is 0 or col is 4 or col % 2 isnt 0
