@@ -6,8 +6,7 @@ class Size
     @width  = attributes.width ? 0
     @height = attributes.height ? 0
 
-  isEqual: (other) ->
-    @toPrimitive() is (other.toPrimitive() ? other)
+  isEqual: (other) -> @width is other.width && @height is other.height
 
   toPrimitive: => { width: @width, height: @height }
 

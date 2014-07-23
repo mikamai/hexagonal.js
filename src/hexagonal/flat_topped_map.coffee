@@ -1,8 +1,23 @@
 AbstractMap = require './abstract_map.coffee'
 Hexagon     = require './hexagon.coffee'
 Point       = require './core/point.coffee'
+Size        = require './core/size.coffee'
 
 class FlatToppedMap extends AbstractMap
+  size: =>
+    new Size
+      width : @_round(@cols * @_sample.size().width)
+      height: @_round(@rows * @_sample.size().height + @_sample.size().height / 2)
+
+  _calcHexagonSize: (attributes) =>
+    if attributes.width? or attributes.height?
+      {
+        width: if attributes.width? then (2 * attributes.width) / (2 * @cols + 1)
+        height: if attributes.height? then attributes.height / @rows
+      }
+    else
+      throw new Error "Cannot Don't know how to create an hexagon!"
+
   _hexagonAttributes: (attributes) =>
     attributes.flatTop ?= true
     attributes

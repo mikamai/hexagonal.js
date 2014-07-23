@@ -1,5 +1,6 @@
 describe 'PointlyToppedMap', ->
   Subject = Hexagonal.PointlyToppedMap
+  Size    = Hexagonal.Size
 
   it 'is defined in the Hexagonal namespace', ->
     expect(Subject).not.toBeUndefined()
@@ -110,6 +111,11 @@ describe 'PointlyToppedMap', ->
           expect(hexagon.halfEdges[4].edge).toBe neighbor.halfEdges[1].edge
 
   describe 'constructor', ->
+    describe 'and an invalid hexagon property is passed', ->
+      it 'throws an error', ->
+        expect ->
+          new Subject hexagon: { asd: 'foo', bar: 'baz' }
+        .toThrowError 'Unknown Hexagon properties: asd, bar'
     describe 'when cols and rows are provided', ->
       describe 'and only one hexagon dimension is passed', ->
         itBehavesLikeAPointlyToppedMap Subject, hexagon: { width: 10 }, cols: 5, rows: 6
@@ -117,8 +123,18 @@ describe 'PointlyToppedMap', ->
         itBehavesLikeAPointlyToppedMap Subject, hexagon: { height: 10, width: 10 }, cols: 5, rows: 6
       describe 'and hexagon radius is passed', ->
         itBehavesLikeAPointlyToppedMap Subject, hexagon: { radius: 5 }, cols: 5, rows: 6
-      describe 'and an invalid hexagon property is passed', ->
-        it 'throws an error', ->
-          expect ->
-            new Subject hexagon: { asd: 'foo', bar: 'baz' }
-          .toThrowError 'Unknown Hexagon properties: asd, bar'
+      describe 'and width and height are passed', ->
+        it 'desumes each hexagon size', ->
+          subject = new Subject width: 55, height: 102, cols: 5, rows: 6
+          expect(subject.at(0, 0).size()).toEqual new Size 11, 15.7
+        itBehavesLikeAPointlyToppedMap Subject, width: 55, height: 102, cols: 5, rows: 6
+
+  describe '#size.width', ->
+    it 'returns the total width of each hexagon plus half the width of an hexagon', ->
+      subject = new Subject hexagon: { width: 10 }, rows: 2, cols: 3
+      expect(subject.size().width).toEqual 35
+
+  describe '#size.height', ->
+    it 'returns the total height of each hexagon', ->
+      subject = new Subject hexagon: { height: 10 }, cols: 2, rows: 3
+      expect(subject.size().height).toEqual 30

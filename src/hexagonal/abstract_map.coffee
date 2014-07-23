@@ -7,12 +7,16 @@ Vertex   = require './core/vertex.coffee'
 # Map
 #
 # @example
-#   new Map cols: 10, rows: 10, hexagon: { width: 10 }
-class Map
+#   new AbstractMap cols: 10, rows: 10, hexagon: { width: 10 }
+# @example
+#   new AbstractMap cols: 10, rows: 10, hexagon: { radius: 10 }
+# @example
+#   new AbstractMap cols: 10, rows: 10, width: 500, height: 500
+class AbstractMap
   constructor: (attributes = {}) ->
     [@rows, @cols] = [attributes.rows, attributes.cols]
     @precision = attributes.precision ? 1
-    @_sample = @_createSampleHexagon attributes.hexagon
+    @_sample = @_createSampleHexagon attributes.hexagon ? @_calcHexagonSize(attributes)
     @_hexagons = new Array(@rows * @cols)
     for row in [0...@rows]
       for col in [0...@cols]
@@ -20,7 +24,12 @@ class Map
 
   hexagons: -> @_hexagons
 
+  size: -> throw new Error 'method not implemented'
+
   at: (row, col) -> @_hexagons[@_indexInOffset row, col]
+
+  _calcHexagonSize: (attributes) ->
+    throw new Error 'method not implemented'
 
   _hexagonAttributes: (attributes) ->
     throw new Error 'method not implemented'
@@ -90,4 +99,4 @@ class Map
       nextVertex = vertices[index + 1] ? vertices[0]
       halfEdges[index] = new HalfEdge(new Edge vertex, nextVertex)
 
-module.exports = Map
+module.exports = AbstractMap

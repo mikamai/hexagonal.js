@@ -1,5 +1,5 @@
 beforeEach ->
-  for ClassName in ['Point', 'Hexagon', 'Edge']
+  for ClassName in ['Point', 'Hexagon', 'Edge', 'Size']
     Hexagonal[ClassName]::jasmineToString = Hexagonal[ClassName]::toString
   jasmine.addCustomEqualityTester (actual, expected) ->
     toPrimitive = (o) ->
