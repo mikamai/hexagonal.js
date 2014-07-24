@@ -24,9 +24,9 @@ describe 'Hexagon', ->
     it 'uses the origin if no center is provided', ->
       expect(Subject.byRadius(10).center()).toEqual new Point 0, 0
 
-    describe 'when flatTop is true', ->
+    describe 'when flatTopped is true', ->
       it 'creates another type of vertices collection', ->
-        subject = Subject.byRadius 10, center: { x: 1, y: 1 }, flatTop: true
+        subject = Subject.byRadius 10, center: { x: 1, y: 1 }, flatTopped: true
         expect(subject.vertices()).toEqual [
           new Vertex( 11,  1),
           new Vertex( 6,   9.7),
@@ -59,9 +59,9 @@ describe 'Hexagon', ->
         new Vertex(2, 0),   new Vertex(3, 0.5)
       ]
 
-    describe 'when flatTop is true', ->
+    describe 'when flatTopped is true', ->
       it 'generates vertices in another way', ->
-        subject = Subject.bySize { width: 2, height: 2 }, position: { x: 1, y: 0 }, flatTop: true
+        subject = Subject.bySize { width: 2, height: 2 }, position: { x: 1, y: 0 }, flatTopped: true
         expect(subject.vertices()).toEqual [
           new Vertex(3,   1),
           new Vertex(2.5, 2),
@@ -72,20 +72,20 @@ describe 'Hexagon', ->
         ]
 
     describe 'when only width is provided in size', ->
-      describe 'and flatTop is false', ->
+      describe 'and flatTopped is false', ->
         it 'desumes height multiplying width by a coefficient', ->
           expect(Subject.bySize(width: 1).size()).toEqual new Size 1, 1.2
-      describe 'and flatTop is true', ->
+      describe 'and flatTopped is true', ->
         it 'desumes height dividing width by a coefficient', ->
-          expect(Subject.bySize({ width: 1 }, flatTop: true).size()).toEqual new Size 1, 0.9
+          expect(Subject.bySize({ width: 1 }, flatTopped: true).size()).toEqual new Size 1, 0.9
 
     describe 'when only height is provided in size', ->
-      describe 'and flatTop is false', ->
+      describe 'and flatTopped is false', ->
         it 'desumes width dividing height by a coefficient', ->
           expect(Subject.bySize(height: 1).size()).toEqual new Size 0.9, 1
-      describe 'and flatTop is true', ->
+      describe 'and flatTopped is true', ->
         it 'desumes width multiplying height by a coefficient', ->
-          expect(Subject.bySize({ height: 1 }, flatTop: true).size()).toEqual new Size 1.2, 1
+          expect(Subject.bySize({ height: 1 }, flatTopped: true).size()).toEqual new Size 1.2, 1
 
   describe '::byVertices', ->
     vertices = null
@@ -155,14 +155,14 @@ describe 'Hexagon', ->
     it 'returns a point', ->
       expect(subject.position().constructor).toEqual(Hexagonal.Point)
 
-    describe 'when flatTop is false', ->
+    describe 'when flatTopped is false', ->
       it 'returns the third vertex x and the fifth vertex y', ->
         subject.vertices()[2].x = 100
         subject.vertices()[4].y = 200
         expect(subject.position()).toEqual new Point(100, 200)
 
-    describe 'when flatTop is true', ->
-      beforeEach -> subject.flatTop = true
+    describe 'when flatTopped is true', ->
+      beforeEach -> subject.topMode = 'flat'
       it 'returns the fourth vertex x and the fifth vertex y', ->
         subject.vertices()[3].x = 100
         subject.vertices()[4].y = 200
@@ -207,3 +207,15 @@ describe 'Hexagon', ->
       spyOn(subject, 'position').and.returnValue x: 10, y: 10
       subject.vertices()[1].y = 100
       expect(subject.size().height).toEqual 90
+
+    it 'changes vertices', ->
+      subject = Subject.bySize width: 10
+      subject.size width: 20, height: 15
+      expect(subject.vertices()).toEqual [
+        new Vertex(20, 11.3),
+        new Vertex(10, 15),
+        new Vertex(0,  11.3),
+        new Vertex(0,  3.8),
+        new Vertex(10, 0),
+        new Vertex(20, 3.8)
+      ]

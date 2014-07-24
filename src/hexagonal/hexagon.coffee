@@ -25,12 +25,12 @@ round = (value, precision = 1) ->
 #   new Hexagon position: { x: 1, y: 2}, size: { width: 10 } # height will be desumed
 #   new Hexagon position: { x: 1, y: 2}, size: { height: 10 } # width will be desumed
 #
-# When you create an hexagon you should always pass the flatTop option set to true if you want
+# When you create an hexagon you should always pass the flatTopped option set to true if you want
 # the hexagon to be handled as flat topped.
 #
 # @example
 #   new Hexagon size: { width: 10, height: 10 } # creates a pointy topped hexagon
-#   new Hexagon size: { width: 10, height: 10 }, flatTop: true # creates a flat topped hexagon
+#   new Hexagon size: { width: 10, height: 10 }, flatTopped: true # creates a flat topped hexagon
 #
 # During its calculations, the Hexagon will round its values to one decimal digit by default.
 # You can change this behavior passing a precisionRound attribute:
@@ -63,23 +63,23 @@ class Hexagon
   # @param radius [Number] radius of the circle inscribing the hexagon
   # @param attributes [Hash] Options to provide:
   #   center: center of the hexagon
-  #   flatTop: whether to create a flat topped hexagon or not
+  #   flatTopped: whether to create a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
   #   precision: Number of decimal digits to consider. Default is 1
   @byRadius: (radius, attributes = {}) ->
     center = new Point attributes.center
     vertices = []
     for index in [0...6]
-      angleMod = if attributes.flatTop then 0 else 0.5
+      angleMod = if attributes.flatTopped then 0 else 0.5
       angle    = 2 * Math.PI / 6 * (index + angleMod)
       vertices.push new Vertex
         x: round(center.x + radius * Math.cos(angle), attributes.precision)
         y: round(center.y + radius * Math.sin(angle), attributes.precision)
     @byVertices vertices, attributes
 
-  @_desumedSize: (size, flatTop, precision) ->
+  @_desumedSize: (size, flatTopped, precision) ->
     [width, height] = [size.width, size.height]
-    coeff = if flatTop then 1 / @dimensionCoeff else @dimensionCoeff
+    coeff = if flatTopped then 1 / @dimensionCoeff else @dimensionCoeff
     if width
       new Size width, height ? round(width / coeff, precision)
     else if height
@@ -90,14 +90,14 @@ class Hexagon
   #   If one of the size values (width or height) is not set, it will be
   #   calculated using the other value, generating a regular hexagon
   # @param attributes [Hash] Options to provide:
-  #   flatTop: whether to create a flat topped hexagon or not
+  #   flatTopped: whether to create a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
   #   precision: Number of decimal digits to consider. Default is 1
   @bySize: (size, attributes = {}) ->
     unless size?.width? or size?.height?
       throw new Error "Size must be provided with width or height or both"
-    size = @_desumedSize size, attributes.flatTop, attributes.precision
-    multipliers = @sizeMultipliers[if attributes.flatTop then 'flat' else 'pointly']
+    size = @_desumedSize size, attributes.flatTopped, attributes.precision
+    multipliers = @sizeMultipliers[if attributes.flatTopped then 'flat' else 'pointly']
     vertices = []
     for multiplier in multipliers
       vertices.push new Vertex
@@ -110,7 +110,7 @@ class Hexagon
   #   Vertices have to be ordered counterclockwise starting from the one at
   #   0 degrees (in a flat topped hexagon), or 30 degrees (in a pointly topped hexagon)
   # @param attributes [Hash] Options to provide:
-  #   flatTop: whether this is a flat topped hexagon or not
+  #   flatTopped: whether this is a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
   #   precision: Number of decimal digits to consider. Default is 1
   @byVertices: (vertices, attributes = {}) ->
@@ -126,7 +126,7 @@ class Hexagon
   #   the first vertex at 0 degrees (in a flat topped hexagon),
   #   or 30 degrees (in a pointly topped hexagon)
   # @param attributes [Hash] Options to provide:
-  #   flatTop: whether this is a flat topped hexagon or not
+  #   flatTopped: whether this is a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
   #   precision: Number of decimal digits to consider. Default is 1
   @byEdges: (edges, attributes = {}) ->
@@ -138,10 +138,14 @@ class Hexagon
 
   constructor: (@halfEdges, attributes = {}) ->
     throw new Error 'You have to provide 6 halfedges' if @halfEdges.length isnt 6
-    @flatTop   = !!attributes.flatTop
+    @topMode   = if attributes.flatTopped then 'flat' else 'pointly'
     @precision = attributes.precision ? 1
     @_setPosition attributes.position if attributes.position?
     halfEdge.hexagon = @ for halfEdge in @halfEdges
+
+  isFlatTopped: -> @topMode is 'flat'
+
+  isPointlyTopped: -> @topMode is 'pointly'
 
   vertices: => (halfEdge.va() for halfEdge in @halfEdges)
 
@@ -176,10 +180,8 @@ class Hexagon
 
   _getPosition: ->
     vertices = @vertices()
-    if @flatTop
-      new Point vertices[3].x, vertices[4].y
-    else
-      new Point vertices[2].x, vertices[4].y
+    xVertexIdx = if @isFlatTopped() then 3 else 2
+    new Point vertices[xVertexIdx].x, vertices[4].y
 
   _setPosition: (value) ->
     actual = @_getPosition()
@@ -195,9 +197,8 @@ class Hexagon
 
   _setSize: (value) ->
     position = @_getPosition()
-    multipliers = if @flatTop then @flatTopSizeMultipliers else @sizeMultipliers
     vertices = @vertices()
-    for multiplier, index in multipliers
+    for multiplier, index in @constructor.sizeMultipliers[@topMode]
       vertices[index].x = @_round(position.x + value.width * multiplier.x)
       vertices[index].y = @_round(position.y + value.height * multiplier.y)
 

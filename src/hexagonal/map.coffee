@@ -84,9 +84,9 @@ class Map
 
   _createSampleHexagon: (attributes) =>
     options =
-      position : { x: 0, y: 0 }
-      precision: @precision
-      flatTop  : @isFlatTopped()
+      position  : { x: 0, y: 0 }
+      precision : @precision
+      flatTopped: @isFlatTopped()
     if attributes.width? or attributes.height?
       Hexagon.bySize attributes, options
     else if attributes.radius?
@@ -126,7 +126,7 @@ class Map
     halfEdges = new Array 6
     @_sharedEdgesFromNeighborsInOffset(row, col, halfEdges)
     @_createMissingHalfEdgesInOffset(row, col, halfEdges)
-    new Hexagon halfEdges, precision: @precision, flatTop: @isFlatTopped()
+    new Hexagon halfEdges, precision: @precision, flatTopped: @isFlatTopped()
 
   _sharedVerticesFromNeighborsOfOffset: (row, col, vertices) =>
     for sharedVertex in @sharedHexagonVertices[@topMode]
