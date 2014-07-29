@@ -107,7 +107,7 @@ class Hexagon
 
   # Creates an Hexagon given its vertices
   # @param vertices [Array<Vertex>] Collection of vertices
-  #   Vertices have to be ordered counterclockwise starting from the one at
+  #   Vertices have to be ordered clockwise starting from the one at
   #   0 degrees (in a flat topped hexagon), or 30 degrees (in a pointly topped hexagon)
   # @param attributes [Hash] Options to provide:
   #   flatTopped: whether this is a flat topped hexagon or not

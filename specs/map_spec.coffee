@@ -13,6 +13,30 @@ describe 'Map', ->
       o = { r: row, c: col, i: index }
       callback(hexagon, o) if offsetCondition(o)
 
+  sharedVerticesCheck = (point, destVertices, sourceVertices) ->
+    (hexagon, o) ->
+      neighbor = subject.at o.r + (point.r ? 0), o.c + (point.c ? 0)
+      [vertices, nVertices] = [hexagon.vertices(), neighbor.vertices()]
+      for destVertexIdx, index in destVertices
+        srcVertexIdx = sourceVertices[index]
+        expect(vertices[destVertexIdx]).toBe nVertices[srcVertexIdx]
+
+  sharedEdgeCheck = (point, destEdgeIdx, srcEdgeIdx) ->
+    (hexagon, o) ->
+      neighbor = subject.at o.r + (point.r ? 0), o.c + (point.c ? 0)
+      [halfEdges, nHalfEdges] = [hexagon.halfEdges, neighbor.halfEdges]
+      expect(halfEdges[destEdgeIdx].edge).toBe nHalfEdges[srcEdgeIdx].edge
+
+  eachHexSharesEdgeAndVertices = (checker, point, destEdge, sourceEdge) ->
+    pointS = "#{point.c ? 0}/#{point.r ? 0}"
+    it "shares two vertices with its neighbor in #{pointS}", ->
+      [destVertices, sourceVertices] = [[destEdge, destEdge + 1], [sourceEdge + 1, sourceEdge]]
+      for pairs in [destVertices, sourceVertices]
+        pairs[i] = 0 for pair, i in pairs when pair > 5
+      eachHexagon checker, sharedVerticesCheck(point, destVertices, sourceVertices)
+    it "shares one edge with its neighbor in #{pointS}", ->
+      eachHexagon checker, sharedEdgeCheck(point, destEdge, sourceEdge)
+
   itBehavesLikeAMap = (attributes) ->
     beforeEach -> subject = new Subject attributes
 
@@ -34,76 +58,60 @@ describe 'Map', ->
         itBehavesLikeAMap attributes
         beforeEach -> subject = new Subject attributes
 
-        it 'each hexagon in an even row has the expected position', ->
-          eachHexagon ((o) -> o.r % 2 is 0), (hexagon, o) ->
-            expect(hexagon.position()).toEqual new Point
-              x: subject._round(o.c * hexagon.size().width),
-              y: subject._round(o.r * subject._round(hexagon.size().height * 0.75))
+        describe 'and offsetLayout is "odd"', ->
+          beforeEach ->
+            attributes.offsetLayout = 'odd'
+            subject = new Subject attributes
 
-        it 'each hexagon in an odd row has the expected position', ->
-          eachHexagon ((o) -> o.r % 2 isnt 0), (hexagon, o) ->
-            expect(hexagon.position()).toEqual new Point
-              x: hexagon._round(o.c * hexagon.size().width + hexagon.size().width / 2),
-              y: hexagon._round(o.r * hexagon._round(hexagon.size().height * 0.75))
+          it 'each hexagon in an even row is at the expected position', ->
+            eachHexagon ((o) -> o.r % 2 is 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * hexagon.size().width),
+                y: subject._round(o.r * subject._round(hexagon.size().height * 0.75))
 
-        it 'each hexagon on the same row shares two vertices with the previous one', ->
-          for hexagon, index in subject.hexagons when index % 5 > 0
-            previousOne = subject.hexagons[index - 1]
-            expect(hexagon.vertices()[2]).toBe previousOne.vertices()[0]
-            expect(hexagon.vertices()[3]).toBe previousOne.vertices()[5]
-
-        it 'each hexagon on the same row shares one edge with the previous one', ->
-          for hexagon, index in subject.hexagons when index % 5 > 0
-            previousOne = subject.hexagons[index - 1]
-            expect(hexagon.halfEdges[2].edge).toBe previousOne.halfEdges[5].edge
-
-        describe 'each hexagon in an odd row', ->
-          it 'shares two vertices with its neighbor in -1/0', ->
+          it 'each hexagon in an odd row is moved right by half its height', ->
             eachHexagon ((o) -> o.r % 2 isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c
-              expect(hexagon.vertices()[3]).toBe neighbor.vertices()[1]
-              expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
+              expect(hexagon.position()).toEqual new Point
+                x: hexagon._round(o.c * hexagon.size().width + hexagon.size().width / 2),
+                y: hexagon._round(o.r * hexagon._round(hexagon.size().height * 0.75))
 
-          it 'shares two vertices with its neighbor in -1/+1', ->
-            eachHexagon ((o) -> o.r % 2 isnt 0 and o.c isnt subject.cols - 1), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c + 1
-              expect(hexagon.vertices()[4]).toBe neighbor.vertices()[2]
-              expect(hexagon.vertices()[5]).toBe neighbor.vertices()[1]
+          eachHexSharesEdgeAndVertices ((o) -> o.c > 0), {c: -1}, 2, 5
 
-          it 'shares one edge with its neighbor in -1/0', ->
+          describe 'each hexagon in an odd row', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.r % 2 isnt 0), {r: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r % 2 isnt 0 and o.c < subject.cols - 1), {r: -1, c: 1}, 4, 1
+
+          describe 'each hexagon in an even row', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.r % 2 is 0 and o.c > 0), {r: -1, c: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.r % 2 is 0), {r: -1}, 4, 1
+
+        describe 'and offsetLayout is "even"', ->
+          beforeEach ->
+            attributes.offsetLayout = 'even'
+            subject = new Subject attributes
+
+          it 'each hexagon in an odd row is at the expected position', ->
             eachHexagon ((o) -> o.r % 2 isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c
-              expect(hexagon.halfEdges[3].edge).toBe neighbor.halfEdges[0].edge
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * hexagon.size().width),
+                y: subject._round(o.r * subject._round(hexagon.size().height * 0.75))
 
-          it 'shares one edge with its neighbor in -1/+1', ->
-            eachHexagon ((o) -> o.r % 2 isnt 0 and o.c isnt subject.cols - 1), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c + 1
-              expect(hexagon.halfEdges[4].edge).toBe neighbor.halfEdges[1].edge
+          it 'each hexagon in an even row is moved right by half its height', ->
+            eachHexagon ((o) -> o.r % 2 is 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: hexagon._round(o.c * hexagon.size().width + hexagon.size().width / 2),
+                y: hexagon._round(o.r * hexagon._round(hexagon.size().height * 0.75))
 
-        describe 'each hexagon in an even row', ->
-          it 'shares two vertices with its neighbor in -1/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.r % 2 is 0 and o.c isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c - 1
-              expect(hexagon.vertices()[3]).toBe neighbor.vertices()[1]
-              expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
+          eachHexSharesEdgeAndVertices ((o) -> o.c > 0), {c: -1}, 2, 5
 
-          it 'shares two vertices with its neighbor in -1/0', ->
-            eachHexagon ((o) -> o.r is 0 and o.r % 2 isnt 0 and o.c isnt subject.cols - 1),
-              (hexagon, o) ->
-                neighbor = subject.at o.r - 1, o.c
-                expect(hexagon.vertices()[4]).toBe neighbor.vertices()[2]
-                expect(hexagon.vertices()[5]).toBe neighbor.vertices()[1]
+          describe 'each hexagon in an odd row', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.r % 2 isnt 0 and o.c > 0), {r: -1, c: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r % 2 isnt 0), {r: -1}, 4, 1
 
-          it 'shares one edge with its neighbor in -1/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.r % 2 is 0 and o.c isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c - 1
-              expect(hexagon.halfEdges[3].edge).toBe neighbor.halfEdges[0].edge
-
-          it 'shares one edge with its neighbor in -1/0', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.r % 2 is 0 and o.c isnt subject.cols - 1),
-              (hexagon, o) ->
-                neighbor = subject.at o.r - 1, o.c
-                expect(hexagon.halfEdges[4].edge).toBe neighbor.halfEdges[1].edge
+          describe 'each hexagon in an even row', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.r % 2 is 0), {r: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.r % 2 is 0 and o.c < subject.cols - 1),
+              {r: -1, c: 1}, 4, 1
 
       describe 'and an invalid hexagon property is passed', ->
         it 'throws an error', ->
@@ -140,76 +148,63 @@ describe 'Map', ->
         subject = null
         beforeEach -> subject = new Subject attributes
 
-        it 'each hexagon in an even column has the expected position', ->
-          eachHexagon ((o) -> o.c % 2 is 0), (hexagon, o) ->
-            expect(hexagon.position()).toEqual new Point
-              x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-              y: subject._round(o.r * hexagon.size().height)
+        describe 'and offsetLayout is "odd"', ->
+          beforeEach ->
+            attributes.offsetLayout = 'odd'
+            subject = new Subject attributes
 
-        it 'each hexagon in an odd column has the expected position', ->
-          eachHexagon ((o) -> o.c % 2 isnt 0), (hexagon, o) ->
-            expect(hexagon.position()).toEqual new Point
-              x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-              y: subject._round(hexagon.size().height / 2 + subject._round(o.r * hexagon.size().height))
+          it 'each hexagon in an even column is at the expected position', ->
+            eachHexagon ((o) -> o.c % 2 is 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
+                y: subject._round(o.r * hexagon.size().height)
 
-        it 'each hexagon on the same column shares two vertices with the previous one', ->
-          eachHexagon ((o) -> o.r isnt 0), (hexagon, o) ->
-            previousOne = subject.at o.r - 1, o.c
-            expect(hexagon.vertices()[4]).toBe previousOne.vertices()[2]
-            expect(hexagon.vertices()[5]).toBe previousOne.vertices()[1]
+          it 'each hexagon in an odd column is moved bottom by half its height', ->
+            eachHexagon ((o) -> o.c % 2 isnt 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
+                y: subject._round(hexagon.size().height / 2 + subject._round(o.r * hexagon.size().height))
 
-        it 'each hexagon on the same column shares one edge with the previous one', ->
-          eachHexagon ((o) -> o.r isnt 0), (hexagon, o) ->
-            previousOne = subject.at o.r - 1, o.c
-            expect(hexagon.halfEdges[4].edge).toBe previousOne.halfEdges[1].edge
+          eachHexSharesEdgeAndVertices ((o) -> o.r > 0), {r: -1}, 4, 1
 
-        describe 'each hexagon in an odd column', ->
-          it 'shares two vertices with its neighbor in 0/-1', ->
-            eachHexagon ((o) -> o.c % 2 isnt 0 and o.r isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r, o.c - 1
-              expect(hexagon.vertices()[3]).toBe neighbor.vertices()[1]
-              expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
+          describe 'each hexagon in an odd column', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.c % 2 isnt 0), {c: -1}, 3, 0
 
-          it 'shares one edge with its neighbor in 0/-1', ->
-            eachHexagon ((o) -> o.c % 2 isnt 0 and o.r isnt 0), (hexagon, o) ->
-              neighbor = subject.at o.r, o.c - 1
-              expect(hexagon.halfEdges[3].edge).toBe neighbor.halfEdges[0].edge
+          describe 'each hexagon in an even col', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.c > 0 and o.c % 2 is 0), {c: -1}, 2, 5
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.c > 0 and o.c % 2 is 0),
+              {r: -1, c: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.c < subject.cols - 1 and o.c % 2 is 0),
+              {r: -1, c: 1}, 5, 2
 
-        describe 'each hexagon in an even col', ->
-          it 'shares two vertices with its neighbor in -1/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt 0 and o.c % 2 is 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c - 1
-              expect(hexagon.vertices()[3]).toBe neighbor.vertices()[1]
-              expect(hexagon.vertices()[4]).toBe neighbor.vertices()[0]
+        describe 'and offsetLayout is "even"', ->
+          beforeEach ->
+            attributes.offsetLayout = 'even'
+            subject = new Subject attributes
 
-          it 'shares two vertices with its neighbor in 0/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt 0 and o.c % 2 is 0), (hexagon, o) ->
-              neighbor = subject.at o.r, o.c - 1
-              expect(hexagon.vertices()[2]).toBe neighbor.vertices()[0]
-              expect(hexagon.vertices()[3]).toBe neighbor.vertices()[5]
+          it 'each hexagon in an odd column is at the expected position', ->
+            eachHexagon ((o) -> o.c % 2 isnt 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
+                y: subject._round(o.r * hexagon.size().height)
 
-          it 'shares two vertices with its neighbor in -1/+1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt 4 and o.c % 2 is 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c + 1
-              expect(hexagon.vertices()[0]).toBe neighbor.vertices()[2]
-              expect(hexagon.vertices()[5]).toBe neighbor.vertices()[3]
+          it 'each hexagon in an even column is moved bottom by half its height', ->
+            eachHexagon ((o) -> o.c % 2 is 0), (hexagon, o) ->
+              expect(hexagon.position()).toEqual new Point
+                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
+                y: subject._round(hexagon.size().height / 2 + subject._round(o.r * hexagon.size().height))
 
-          it 'shares one edge with its neighbor in -1/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt 0 and o.c % 2 is 0), (hexagon, o) ->
-              neighbor = subject.at o.r - 1, o.c - 1
-              expect(hexagon.halfEdges[3].edge).toBe neighbor.halfEdges[0].edge
+          eachHexSharesEdgeAndVertices ((o) -> o.r > 0), {r: -1}, 4, 1
 
-          it 'shares one edge with its neighbor in 0/-1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt 0 and o.c % 2 is 0), (hexagon, o) ->
-              neighbor = subject.at o.r, o.c - 1
-              expect(hexagon.halfEdges[2].edge).toBe neighbor.halfEdges[5].edge
+          describe 'each hexagon in an odd column', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.c % 2 > 0), {c: -1}, 2, 5
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.c % 2 isnt 0), {r: -1, c: -1}, 3, 0
+            eachHexSharesEdgeAndVertices ((o) -> o.r > 0 and o.c < subject.cols - 1 and o.c % 2 isnt 0),
+              {r: -1, c: 1}, 5, 2
 
-          it 'shares one edge with its neighbor -1/+1', ->
-            eachHexagon ((o) -> o.r isnt 0 and o.c isnt subject.cols - 1 and o.c % 2 is 0),
-              (hexagon, o) ->
-                neighbor = subject.at o.r - 1, o.c + 1
-                expect(hexagon.halfEdges[5].edge).toBe neighbor.halfEdges[2].edge
-
+          describe 'each hexagon in an even col', ->
+            eachHexSharesEdgeAndVertices ((o) -> o.c > 0 and o.c % 2 is 0), {c: -1}, 3, 0
+            
       describe 'when an invalid hexagon property is passed', ->
         it 'throws an error', ->
           expect ->
