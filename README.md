@@ -39,7 +39,7 @@ To each of the methods described above you can pass additional options to custom
 
 ### Hexagonal Map
 
-```
+```coffeescript
 # map of 10x10 composed by regular hexagons with a width of 10
 new Hexagonal.Map cols: 10, rows: 10, hexagon: { width: 10 }
 # map of 10x10 composed by hexagons with a size of 2x3
@@ -59,7 +59,7 @@ Once you have the map, you can choose which Cursor you want to use to navigate i
 
 #### Offset Cursor
 
-```
+```coffeescript
 map = new Hexagonal.Map rows: 5, cols: 5, hexagon: { radius: 5 }
 cursor = new Hexagonal.Cursors.Offset map, 0, 0 # offset cursor, set in 0,0 (first hexagon)
 cursor.moveTo 2, 2 # move to the center and returns the current hexagon
@@ -68,7 +68,7 @@ cursor.hexagon # => returns the current hexagon
 
 #### Axial Cursor
 
-```
+```coffeescript
 map = new Hexagonal.Map rows: 5, cols: 5, hexagon: { radius: 5 }
 cursor = new Hexagonal.Cursors.Axial map, 0, 0 # offset cursor, set in 0,0 (map center)
 cursor.moveTo 2, 2 # move to the last hexagon of the map and returns the current hexagon
@@ -81,7 +81,7 @@ To arginate floating point rounding errors each calculation in Hexagonal will be
 rounded to 1 decimal digit. If you want to change it, you can set how many decimal
 digits to use:
 
-```
+```coffeescript
 Hexagonal.precision() # => 1
 Hexagonal.Util.round(3.123) # => 3.1
 Hexagonal.precision(2)
