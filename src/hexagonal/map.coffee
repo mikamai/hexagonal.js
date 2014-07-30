@@ -91,7 +91,7 @@ class HexagonMatrixFactory
 
   _eachHalfEdgeFromSharedMappings: (i, j, callback) ->
     for mapping in @sharedHexagonEdges[@topMode][@offsetLayout]
-      neighbor = @matrix[i + mapping.pos.x]?[j + mapping.pos.y]
+      neighbor = @matrix[j + mapping.pos.y]?[i + mapping.pos.x]
       rel = if @isFlatTopped() then i else j
       continue if (mapping.type is 'odd' and rel % 2 is 0) or (mapping.type is 'even' and rel % 2 isnt 0)
       continue unless neighbor?
@@ -126,7 +126,7 @@ class HexagonMatrixFactory
 #   new Map cols: 10, rows: 10, width: 500, height: 500
 class Map
   constructor: (attributes = {}) ->
-    factory      = new HexagonMatrixFactory attributes
+    @f = factory      = new HexagonMatrixFactory attributes
     for meth in ['isFlatTopped', 'isPointlyTopped', 'isEvenOffsetLayout', 'isOddOffsetLayout']
       @[meth] = factory[meth]
     @matrix = factory.buildMatrix
