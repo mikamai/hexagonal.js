@@ -4,7 +4,7 @@ class HalfEdge
     if @direction isnt 1 and @direction isnt -1
       throw new Error 'Direction must be 1 or -1'
     @hexagon = null
-    @edge.pushHalfEdge @
+    @edge.halfEdges.push @
 
   vertices: ->
     if @direction is 1
@@ -14,6 +14,9 @@ class HalfEdge
 
   va: -> @vertices()[0]
   vb: -> @vertices()[1]
+
+  otherHalfEdge: ->
+    return halfEdge for halfEdge in @edge.halfEdges when halfEdge isnt @
 
   isEqual: (other) => @va().isEqual(other.va()) and @vb().isEqual(other.vb())
 

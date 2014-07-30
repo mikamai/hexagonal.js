@@ -6,9 +6,6 @@ class Edge
     vertex.pushEdge @ for vertex in @vertices
     @halfEdges = []
 
-  pushHalfEdge: (halfEdge) ->
-    @halfEdges.push halfEdge
-
   hexagons: -> (halfEdge.hexagon for halfEdge in @halfEdges)
 
   isContainedIn: (hexagon) ->

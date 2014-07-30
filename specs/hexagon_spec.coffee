@@ -148,6 +148,18 @@ describe 'Hexagon', ->
       for halfEdge in subject.halfEdges
         expect(halfEdge.hexagon).toEqual subject
 
+  describe '#neighbors', ->
+    [subject, other] = [null, null]
+    beforeEach ->
+      subject = Subject.bySize { width: 10 }, position: { x: 5, y: 7 }
+      other = Subject.byEdges subject.edges()
+
+    it 'returns a collection', ->
+      expect(subject.neighbors().constructor).toBe Array
+
+    it 'returns a list with other hexagons using an edge', ->
+      expect(subject.neighbors()).toEqual [other]
+
   describe '#position', ->
     subject = null
     beforeEach -> subject = Subject.bySize { width: 10 }, position: { x: 5, y: 7 }

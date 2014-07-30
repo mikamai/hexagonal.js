@@ -3,8 +3,9 @@ Hexagonal = {}
 for ClassName, Class of require './core/index.coffee'
   Hexagonal[ClassName] = Class
 
-Hexagonal.Hexagon  = require './hexagon.coffee'
-Hexagonal.Map      = require './map.coffee'
+Hexagonal.Hexagon = require './hexagon.coffee'
+Hexagonal.Map     = require './map.coffee'
+Hexagonal.Cursors = require './cursors/index.coffee'
 
 Hexagonal.precision = Hexagonal.Util.precision
 Hexagonal.usingPrecision = (precision, callback) ->

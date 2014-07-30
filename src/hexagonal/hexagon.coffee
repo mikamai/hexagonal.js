@@ -130,20 +130,25 @@ class Hexagon
 
   isPointlyTopped: -> @topMode is 'pointly'
 
-  vertices: => (halfEdge.va() for halfEdge in @halfEdges)
+  vertices: -> (halfEdge.va() for halfEdge in @halfEdges)
+
+  edges: -> (halfEdge.edge for halfEdge in @halfEdges)
 
   center: => @position().sum @size().width / 2, @size().height / 2
 
-  position: (value) =>
-    if value? then @_setPosition(value) else @_getPosition()
+  position: (value) => if value? then @_setPosition(value) else @_getPosition()
 
-  size: (value) =>
-    if value?
-      @_setSize value
-    else
-      @_getSize()
+  size: (value) => if value? then @_setSize(value) else @_getSize()
 
-  toString: => "#{@constructor.name} (#{@position().toString()}; #{@size().toString()})"
+  neighbors: ->
+    neighbors = []
+    for halfEdge in @halfEdges
+      otherHalfEdge = halfEdge.otherHalfEdge()
+      if otherHalfEdge? and neighbors.indexOf(otherHalfEdge.hexagon) < 0
+        neighbors.push otherHalfEdge.hexagon
+    neighbors
+
+  toString: => "#{@constructor.name}(#{@position().toString()}; #{@size().toString()})"
 
   isEqual: (other) ->
     return false if @vertices.length isnt (other.vertices?.length ? 0)
