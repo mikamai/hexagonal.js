@@ -55,6 +55,11 @@ new Hexagonal.Map cols: 10, rows: 10, width: 500
 new Hexagonal.Map cols: 10, rows: 10, width: 500, height: 500
 ```
 
+In addition you can use the following options when building a new map:
+
+- `flatTopped` (default: false) By default the map will be composed by _pointly topped_ hexagons. Set it to true if you want to use _flat topped_ hexagons.
+- `offsetLayout` (default: 'odd') Set it to 'even' you want to change the layout (shifting even rows/cols instead of odd rows/cols).
+
 Once you have the map, you can choose which Cursor you want to use to navigate it:
 
 #### Offset Cursor
