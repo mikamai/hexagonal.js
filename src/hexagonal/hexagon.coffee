@@ -4,9 +4,7 @@ Vertex   = require './core/vertex.coffee'
 Edge     = require './core/edge.coffee'
 HalfEdge = require './core/half_edge.coffee'
 
-round = (value, precision = 1) ->
-  divider = Math.pow 10, precision
-  Math.round(value * divider) / divider
+round    = require('./core/util.coffee').round
 
 # Hexagon
 #
@@ -31,14 +29,6 @@ round = (value, precision = 1) ->
 # @example
 #   new Hexagon size: { width: 10, height: 10 } # creates a pointy topped hexagon
 #   new Hexagon size: { width: 10, height: 10 }, flatTopped: true # creates a flat topped hexagon
-#
-# During its calculations, the Hexagon will round its values to one decimal digit by default.
-# You can change this behavior passing a precisionRound attribute:
-#
-# @example
-#   new Hexagon radius: 5, precisionRound: 0  # no decimal digits
-#   new Hexagon radius: 5, precisionRound: 2  # two decimal digits
-#   new Hexagon radius: 5, precisionRound: -1 # no rounding
 class Hexagon
   @sizeMultipliers:
     pointly: [
@@ -65,7 +55,6 @@ class Hexagon
   #   center: center of the hexagon
   #   flatTopped: whether to create a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
-  #   precision: Number of decimal digits to consider. Default is 1
   @byRadius: (radius, attributes = {}) ->
     center = new Point attributes.center
     vertices = []
@@ -73,17 +62,17 @@ class Hexagon
       angleMod = if attributes.flatTopped then 0 else 0.5
       angle    = 2 * Math.PI / 6 * (index + angleMod)
       vertices.push new Vertex
-        x: round(center.x + radius * Math.cos(angle), attributes.precision)
-        y: round(center.y + radius * Math.sin(angle), attributes.precision)
+        x: round(center.x + radius * Math.cos(angle))
+        y: round(center.y + radius * Math.sin(angle))
     @byVertices vertices, attributes
 
-  @_desumedSize: (size, flatTopped, precision) ->
+  @_desumedSize: (size, flatTopped) ->
     [width, height] = [size.width, size.height]
     coeff = if flatTopped then 1 / @dimensionCoeff else @dimensionCoeff
     if width
-      new Size width, height ? round(width / coeff, precision)
+      new Size width, height ? round(width / coeff)
     else if height
-      new Size round(height * coeff, precision), height
+      new Size round(height * coeff), height
 
   # Creates an Hexagon given its size
   # @param size [Size] Size to use to create the hexagon
@@ -92,17 +81,16 @@ class Hexagon
   # @param attributes [Hash] Options to provide:
   #   flatTopped: whether to create a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
-  #   precision: Number of decimal digits to consider. Default is 1
   @bySize: (size, attributes = {}) ->
     unless size?.width? or size?.height?
       throw new Error "Size must be provided with width or height or both"
-    size = @_desumedSize size, attributes.flatTopped, attributes.precision
+    size = @_desumedSize size, attributes.flatTopped
     multipliers = @sizeMultipliers[if attributes.flatTopped then 'flat' else 'pointly']
     vertices = []
     for multiplier in multipliers
       vertices.push new Vertex
-        x: round(size.width  * multiplier.x, attributes.precision)
-        y: round(size.height * multiplier.y, attributes.precision)
+        x: round(size.width  * multiplier.x)
+        y: round(size.height * multiplier.y)
     @byVertices vertices, attributes
 
   # Creates an Hexagon given its vertices
@@ -112,7 +100,6 @@ class Hexagon
   # @param attributes [Hash] Options to provide:
   #   flatTopped: whether this is a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
-  #   precision: Number of decimal digits to consider. Default is 1
   @byVertices: (vertices, attributes = {}) ->
     throw new Error 'You have to provide 6 vertices' if vertices.length isnt 6
     edges = (for vertex, index in vertices
@@ -128,18 +115,14 @@ class Hexagon
   # @param attributes [Hash] Options to provide:
   #   flatTopped: whether this is a flat topped hexagon or not
   #   position: position to set when the hexagon has been built
-  #   precision: Number of decimal digits to consider. Default is 1
   @byEdges: (edges, attributes = {}) ->
     throw new Error 'You have to provide 6 edges' if edges.length isnt 6
     halfEdges = (new HalfEdge(edge) for edge in edges)
     new Hexagon halfEdges, attributes
 
-  precision: 1
-
   constructor: (@halfEdges, attributes = {}) ->
     throw new Error 'You have to provide 6 halfedges' if @halfEdges.length isnt 6
     @topMode   = if attributes.flatTopped then 'flat' else 'pointly'
-    @precision = attributes.precision ? 1
     @_setPosition attributes.position if attributes.position?
     halfEdge.hexagon = @ for halfEdge in @halfEdges
 
@@ -176,7 +159,7 @@ class Hexagon
       attributes.vertices[index]     ?= edge.va
       attributes.vertices[index + 1] ?= edge.vb
 
-  _round: (value) -> round(value, @precision)
+  _round: (value) -> round(value)
 
   _getPosition: ->
     vertices = @vertices()
@@ -186,20 +169,20 @@ class Hexagon
   _setPosition: (value) ->
     actual = @_getPosition()
     for vertex in @vertices()
-      vertex.x = @_round(vertex.x - actual.x + value.x)
-      vertex.y = @_round(vertex.y - actual.y + value.y)
+      vertex.x = round(vertex.x - actual.x + value.x)
+      vertex.y = round(vertex.y - actual.y + value.y)
 
   _getSize: ->
     vertices = @vertices()
     new Size
-      width : @_round Math.abs(vertices[0].x - @position().x)
-      height: @_round Math.abs(vertices[1].y - @position().y)
+      width : round Math.abs(vertices[0].x - @position().x)
+      height: round Math.abs(vertices[1].y - @position().y)
 
   _setSize: (value) ->
     position = @_getPosition()
     vertices = @vertices()
     for multiplier, index in @constructor.sizeMultipliers[@topMode]
-      vertices[index].x = @_round(position.x + value.width * multiplier.x)
-      vertices[index].y = @_round(position.y + value.height * multiplier.y)
+      vertices[index].x = round(position.x + value.width * multiplier.x)
+      vertices[index].y = round(position.y + value.height * multiplier.y)
 
 module.exports = Hexagon

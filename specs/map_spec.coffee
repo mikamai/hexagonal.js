@@ -2,6 +2,7 @@ describe 'Map', ->
   Subject = Hexagonal.Map
   Size    = Hexagonal.Size
   Point   = Hexagonal.Point
+  round   = Hexagonal.Util.round
   subject = null
 
   it 'is defined in the Hexagonal namespace', ->
@@ -66,14 +67,14 @@ describe 'Map', ->
           it 'each hexagon in an even row is at the expected position', ->
             eachHexagon ((o) -> o.r % 2 is 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * hexagon.size().width),
-                y: subject._round(o.r * subject._round(hexagon.size().height * 0.75))
+                x: round(o.c * hexagon.size().width),
+                y: round(o.r * round(hexagon.size().height * 0.75))
 
           it 'each hexagon in an odd row is moved right by half its height', ->
             eachHexagon ((o) -> o.r % 2 isnt 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: hexagon._round(o.c * hexagon.size().width + hexagon.size().width / 2),
-                y: hexagon._round(o.r * hexagon._round(hexagon.size().height * 0.75))
+                x: round(o.c * hexagon.size().width + hexagon.size().width / 2),
+                y: round(o.r * round(hexagon.size().height * 0.75))
 
           eachHexSharesEdgeAndVertices ((o) -> o.c > 0), {c: -1}, 2, 5
 
@@ -93,14 +94,14 @@ describe 'Map', ->
           it 'each hexagon in an odd row is at the expected position', ->
             eachHexagon ((o) -> o.r % 2 isnt 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * hexagon.size().width),
-                y: subject._round(o.r * subject._round(hexagon.size().height * 0.75))
+                x: round(o.c * hexagon.size().width),
+                y: round(o.r * round(hexagon.size().height * 0.75))
 
           it 'each hexagon in an even row is moved right by half its height', ->
             eachHexagon ((o) -> o.r % 2 is 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: hexagon._round(o.c * hexagon.size().width + hexagon.size().width / 2),
-                y: hexagon._round(o.r * hexagon._round(hexagon.size().height * 0.75))
+                x: round(o.c * hexagon.size().width + hexagon.size().width / 2),
+                y: round(o.r * round(hexagon.size().height * 0.75))
 
           eachHexSharesEdgeAndVertices ((o) -> o.c > 0), {c: -1}, 2, 5
 
@@ -156,14 +157,14 @@ describe 'Map', ->
           it 'each hexagon in an even column is at the expected position', ->
             eachHexagon ((o) -> o.c % 2 is 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-                y: subject._round(o.r * hexagon.size().height)
+                x: round(o.c * round(0.75 * hexagon.size().width)),
+                y: round(o.r * hexagon.size().height)
 
           it 'each hexagon in an odd column is moved bottom by half its height', ->
             eachHexagon ((o) -> o.c % 2 isnt 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-                y: subject._round(hexagon.size().height / 2 + subject._round(o.r * hexagon.size().height))
+                x: round(o.c * round(0.75 * hexagon.size().width)),
+                y: round(hexagon.size().height / 2 + round(o.r * hexagon.size().height))
 
           eachHexSharesEdgeAndVertices ((o) -> o.r > 0), {r: -1}, 4, 1
 
@@ -185,14 +186,14 @@ describe 'Map', ->
           it 'each hexagon in an odd column is at the expected position', ->
             eachHexagon ((o) -> o.c % 2 isnt 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-                y: subject._round(o.r * hexagon.size().height)
+                x: round(o.c * round(0.75 * hexagon.size().width)),
+                y: round(o.r * hexagon.size().height)
 
           it 'each hexagon in an even column is moved bottom by half its height', ->
             eachHexagon ((o) -> o.c % 2 is 0), (hexagon, o) ->
               expect(hexagon.position()).toEqual new Point
-                x: subject._round(o.c * subject._round(0.75 * hexagon.size().width)),
-                y: subject._round(hexagon.size().height / 2 + subject._round(o.r * hexagon.size().height))
+                x: round(o.c * round(0.75 * hexagon.size().width)),
+                y: round(hexagon.size().height / 2 + round(o.r * hexagon.size().height))
 
           eachHexSharesEdgeAndVertices ((o) -> o.r > 0), {r: -1}, 4, 1
 

@@ -219,3 +219,8 @@ describe 'Hexagon', ->
         new Vertex(10, 0),
         new Vertex(20, 3.8)
       ]
+
+  it 'correctly uses precision', ->
+    expect(Subject.bySize(width: 5).size().height).toBe 5.8
+    Hexagonal.usingPrecision 3, ->
+      expect(Subject.bySize(width: 5).size().height).toBe 5.774

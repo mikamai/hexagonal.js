@@ -5,9 +5,7 @@ HalfEdge = require './core/half_edge.coffee'
 Vertex   = require './core/vertex.coffee'
 Size     = require './core/size.coffee'
 
-round = (value, precision = 1) ->
-  divider = Math.pow 10, precision
-  Math.round(value * divider) / divider
+round    = require('./core/util.coffee').round
 
 class HexagonMatrixFactory
   sharedHexagonEdges:
@@ -43,7 +41,6 @@ class HexagonMatrixFactory
       ]
 
   constructor: (options = {}) ->
-    @precision    = options.precision ? 1
     @topMode      = options.topMode ? 'pointly'
     unless ['flat', 'pointly'].indexOf(@topMode) >= 0
       throw new Error "Unknown topMode. Allowed values: pointly, flat"
@@ -68,7 +65,7 @@ class HexagonMatrixFactory
     @hexagons
 
   _createSampleHexagon: (hexAttributes) =>
-    options = { position: {x: 0, y: 0}, precision: @precision, flatTopped: @isFlatTopped() }
+    options = { position: {x: 0, y: 0}, flatTopped: @isFlatTopped() }
     if hexAttributes.width? or hexAttributes.height?
       Hexagon.bySize hexAttributes, options
     else if hexAttributes.radius?
@@ -79,21 +76,19 @@ class HexagonMatrixFactory
   _createHexagonInOffset: (i, j) ->
     position = @_expectedPositionInOffset i, j
     halfEdges = @halfEdgesFromNeighborhood i, j
-    new Hexagon halfEdges, precision: @precision, flatTopped: @isFlatTopped()
-
-  _round: (value) -> round(value, @precision)
+    new Hexagon halfEdges, flatTopped: @isFlatTopped()
 
   _expectedPositionInOffset: (i, j) ->
     if @isFlatTopped()
       yMod = if @_isShiftingRequired(i) then @_sample.vertices()[0].y else 0
       new Point
-        x: @_round(@_round(@_sample.size().width * 0.75) * i)
-        y: @_round(@_round(@_sample.size().height * j) + yMod)
+        x: round(round(@_sample.size().width * 0.75) * i)
+        y: round(round(@_sample.size().height * j) + yMod)
     else
       xMod = if @_isShiftingRequired(j) then @_sample.vertices()[1].x else 0
       new Point
-        x: @_round(xMod + @_round(@_sample.size().width * i))
-        y: @_round(@_round(@_sample.size().height * 0.75) * j)
+        x: round(xMod + round(@_sample.size().width * i))
+        y: round(round(@_sample.size().height * 0.75) * j)
 
   _isShiftingRequired: (rel) ->
     (@isEvenOffsetLayout() and rel % 2 is 0) or (@isOddOffsetLayout() and rel % 2 isnt 0)
@@ -127,7 +122,7 @@ class HexagonMatrixFactory
       vertices[(halfEdgeIdx + 1) % vertices.length] ?= srcHalfEdge.va()
     for v, index in @_sample.vertices() when not vertices[index]?
       pos = @_expectedPositionInOffset i, j
-      vertices[index] = new Vertex @_round(v.x + pos.x), @_round(v.y + pos.y)
+      vertices[index] = new Vertex round(v.x + pos.x), round(v.y + pos.y)
     vertices
 
 # Map
@@ -144,7 +139,6 @@ class Map
     @cols          = attributes.cols
     @topMode       = attributes.flatTopped && 'flat' || 'pointly'
     @offsetLayout  = attributes.offsetLayout ? 'odd'
-    @precision     = attributes.precision ? 1
     factory = new HexagonMatrixFactory attributes
     factory.topMode = @topMode
     factory.offsetLayout = @offsetLayout
@@ -179,10 +173,6 @@ class Map
         }
     else
       throw new Error "Cannot detect the correct size of the hexagon!"
-
-  _round: (value) ->
-    divider = Math.pow 10, @precision
-    Math.round(value * divider) / divider
 
   _indexInOffset: (row, col) ->
     return null if col < 0 or row < 0 or col >= @cols or row >= @rows
