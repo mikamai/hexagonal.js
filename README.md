@@ -75,6 +75,19 @@ cursor.moveTo 2, 2 # move to the last hexagon of the map and returns the current
 cursor.hexagon # => returns the current hexagon
 ```
 
+### Precision
+
+To arginate floating point rounding errors each calculation in Hexagonal will be
+rounded to 1 decimal digit. If you want to change it, you can set how many decimal
+digits to use:
+
+```
+Hexagonal.precision() # => 1
+Hexagonal.Util.round(3.123) # => 3.1
+Hexagonal.precision(2)
+Hexagonal.Util.round(3.12) # => 3.12
+```
+
 ## Tests
 
 Use grunt to run tests and compile into javascript. Running grunt will:
