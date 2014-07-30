@@ -16,7 +16,7 @@ describe 'Map', ->
 
   sharedVerticesCheck = (point, destVertices, sourceVertices) ->
     (hexagon, o) ->
-      neighbor = subject.at o.r + (point.r ? 0), o.c + (point.c ? 0)
+      neighbor = subject.at o.c + (point.c ? 0), o.r + (point.r ? 0)
       [vertices, nVertices] = [hexagon.vertices(), neighbor.vertices()]
       for destVertexIdx, index in destVertices
         srcVertexIdx = sourceVertices[index]
@@ -24,7 +24,7 @@ describe 'Map', ->
 
   sharedEdgeCheck = (point, destEdgeIdx, srcEdgeIdx) ->
     (hexagon, o) ->
-      neighbor = subject.at o.r + (point.r ? 0), o.c + (point.c ? 0)
+      neighbor = subject.at o.c + (point.c ? 0), o.r + (point.r ? 0)
       [halfEdges, nHalfEdges] = [hexagon.halfEdges, neighbor.halfEdges]
       expect(halfEdges[destEdgeIdx].edge).toBe nHalfEdges[srcEdgeIdx].edge
 
@@ -42,7 +42,7 @@ describe 'Map', ->
     beforeEach -> subject = new Subject attributes
 
     it 'creates cols*rows hexagons', ->
-      expect(subject.hexagons.length).toEqual 30
+      expect(subject.hexagons().length).toEqual 30
     it 'each item in the hexagons collection is filled with an hexagon', ->
       for hexagon in subject.hexagons
         throw new Error index unless hexagon?

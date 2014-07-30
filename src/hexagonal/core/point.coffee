@@ -1,3 +1,5 @@
+round = require('./util.coffee').round
+
 class Point
   constructor: ->
     attributes = @_extractAttributes(arguments)
@@ -12,11 +14,11 @@ class Point
 
   sum: ->
     attributes = @_extractAttributes(arguments)
-    new @constructor @x + attributes.x, @y + attributes.y
+    new @constructor round(@x + attributes.x), round(@y + attributes.y)
 
   sub: ->
     attributes = @_extractAttributes(arguments)
-    new @constructor @x - attributes.x, @y - attributes.y
+    new @constructor round(@x - attributes.x), round(@y - attributes.y)
 
   _extractAttributes: (args) ->
     attributes = args[0] ? {}
