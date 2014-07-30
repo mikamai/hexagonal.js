@@ -117,7 +117,7 @@ describe 'Map', ->
         it 'throws an error', ->
           expect ->
             new Subject hexagon: { asd: 'foo', bar: 'baz' }
-          .toThrowError 'Unknown Hexagon properties: asd, bar'
+          .toThrowError "Unknown hexagon directive. You have to pass the radius or at least one dimension"
       describe 'when cols and rows are provided', ->
         describe 'and only one hexagon dimension is passed', ->
           itBehavesLikeAPointlyToppedMap hexagon: { width: 10 }, cols: 5, rows: 6
@@ -204,12 +204,12 @@ describe 'Map', ->
 
           describe 'each hexagon in an even col', ->
             eachHexSharesEdgeAndVertices ((o) -> o.c > 0 and o.c % 2 is 0), {c: -1}, 3, 0
-            
+
       describe 'when an invalid hexagon property is passed', ->
         it 'throws an error', ->
           expect ->
             new Subject hexagon: { asd: 'foo', bar: 'baz' }, flatTopped: true
-          .toThrowError 'Unknown Hexagon properties: asd, bar'
+          .toThrowError "Unknown hexagon directive. You have to pass the radius or at least one dimension"
       describe 'when cols and rows are provided', ->
         describe 'and only one hexagon dimension is passed', ->
           itBehavesLikeAFlatToppedMap hexagon: { height: 10 }, cols: 5, rows: 6, flatTopped: true
