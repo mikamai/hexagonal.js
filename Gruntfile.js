@@ -9,7 +9,7 @@ module.exports = function(grunt) {
       ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
     watch: {
       all: {
-        files: ['src/**/*.coffee', 'specs/**/*.coffee', 'gruntfile.js'],
+        files: ['src/**/*.coffee', 'specs/**/*.coffee', 'Gruntfile.js'],
         tasks: ['default'],
         options: {
           reload: true,
