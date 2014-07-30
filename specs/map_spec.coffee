@@ -129,7 +129,7 @@ describe 'Map', ->
         describe 'and width and height are passed', ->
           it 'detects each hexagon size', ->
             subject = new Subject width: 55, height: 102, cols: 5, rows: 6
-            expect(subject.at(0, 0).size()).toEqual new Size 11, 15.7
+            expect(subject.at(0, 0).size()).toEqual new Size 10, 21.5
           itBehavesLikeAPointlyToppedMap width: 55, height: 102, cols: 5, rows: 6
 
       describe '#size.width', ->
@@ -221,7 +221,7 @@ describe 'Map', ->
         describe 'and width and height are passed', ->
           it 'detects each hexagon size', ->
             subject = new Subject width: 55, height: 102, cols: 5, rows: 6, flatTopped: true
-            expect(subject.at(0, 0).size()).toEqual new Size 10, 17
+            expect(subject.at(0, 0).size()).toEqual new Size 13.8, 15.7
           itBehavesLikeAFlatToppedMap width: 55, height: 102, cols: 5, rows: 6
 
       describe '#size.width', ->

@@ -154,10 +154,10 @@ class Map
     throw new Error "Cannot detect correct hexagon size" unless attributes.width? or attributes.height?
     [rows, cols, width, height] = [attributes.rows, attributes.cols, null, null]
     if attributes.width?
-      divider = if @isFlatTopped() then 2 / (2 * cols + 1) else 1 / cols
+      divider = if @isFlatTopped() then 1 / ((cols - 1) * 0.75 + 1) else 2 / (2 * cols + 1)
       width = round attributes.width * divider
     if attributes.height?
-      divider = if @isFlatTopped() then 1 / rows else 2 / (2 * rows + 1)
+      divider = if @isFlatTopped() then 2 / (2 * rows + 1) else 1 / ((rows - 1) * 0.75 + 1)
       height = round attributes.height * divider
     { width, height }
 
