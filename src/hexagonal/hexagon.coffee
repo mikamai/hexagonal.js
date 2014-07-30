@@ -9,26 +9,26 @@ round    = require('./core/util.coffee').round
 # Hexagon
 #
 # @example Built using Radius
-#   new Hexagon radius: 2 # built with radius 2 and center placed in the origin
-#   new Hexagon center: { x: 1, y: 2 }, radius: 2
+#   Hexagon.byRadius 2 # built with radius 2 and center placed in the origin
+#   Hexagon.byRadius center: { x: 1, y: 2 }, radius: 2
 #
 # @example Built using Vertices
-#   new Hexagon vertices: [v1, v2, v3, v4, v5, v6]
+#   Hexagon.byVertices [v1, v2, v3, v4, v5, v6]
 #
 # @example Built using Edges
-#   new Hexagon edges: [e1, e2, e3, e4, e5, e6]
+#   Hexagon.byEdges [e1, e2, e3, e4, e5, e6]
 #
 # @example Built using Size
-#   new Hexagon size: { width: 10, height: 10 } # with position placed in the origin
-#   new Hexagon position: { x: 1, y: 2}, size: { width: 10 } # height will be desumed
-#   new Hexagon position: { x: 1, y: 2}, size: { height: 10 } # width will be desumed
+#   Hexagon.bySize { width: 10, height: 10 } # with position placed in the origin
+#   Hexagon.bySize { width: 10 },  position: { x: 1, y: 2} # height will be detected
+#   Hexagon.bySize { height: 10 }, position: { x: 1, y: 2} # width will be detected
 #
 # When you create an hexagon you should always pass the flatTopped option set to true if you want
 # the hexagon to be handled as flat topped.
 #
 # @example
-#   new Hexagon size: { width: 10, height: 10 } # creates a pointy topped hexagon
-#   new Hexagon size: { width: 10, height: 10 }, flatTopped: true # creates a flat topped hexagon
+#   Hexagon.bySize { width: 10, height: 10 } # creates a pointy topped hexagon
+#   Hexagon.bySize { width: 10, height: 10 }, flatTopped: true # creates a flat topped hexagon
 class Hexagon
   @sizeMultipliers:
     pointly: [
@@ -66,7 +66,7 @@ class Hexagon
         y: round(center.y + radius * Math.sin(angle))
     @byVertices vertices, attributes
 
-  @_desumedSize: (size, flatTopped) ->
+  @_detectedSize: (size, flatTopped) ->
     [width, height] = [size.width, size.height]
     coeff = if flatTopped then 1 / @dimensionCoeff else @dimensionCoeff
     if width
@@ -84,7 +84,7 @@ class Hexagon
   @bySize: (size, attributes = {}) ->
     unless size?.width? or size?.height?
       throw new Error "Size must be provided with width or height or both"
-    size = @_desumedSize size, attributes.flatTopped
+    size = @_detectedSize size, attributes.flatTopped
     multipliers = @sizeMultipliers[if attributes.flatTopped then 'flat' else 'pointly']
     vertices = []
     for multiplier in multipliers

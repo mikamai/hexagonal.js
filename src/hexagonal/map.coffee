@@ -126,14 +126,12 @@ class HexagonMatrixFactory
 #   new Map cols: 10, rows: 10, width: 500, height: 500
 class Map
   constructor: (attributes = {}) ->
-    @rows          = attributes.rows
-    @cols          = attributes.cols
     factory      = new HexagonMatrixFactory attributes
     for meth in ['isFlatTopped', 'isPointlyTopped', 'isEvenOffsetLayout', 'isOddOffsetLayout']
       @[meth] = factory[meth]
     @matrix = factory.buildMatrix
-      rows: @rows
-      cols: @cols
+      rows: attributes.rows
+      cols: attributes.cols
       hexagon: attributes.hexagon ? @_detectedHexagonSize(attributes)
 
   hexagons: ->
@@ -154,12 +152,12 @@ class Map
 
   _detectedHexagonSize: (attributes) =>
     throw new Error "Cannot detect correct hexagon size" unless attributes.width? or attributes.height?
-    [width, height] = [null, null]
+    [rows, cols, width, height] = [attributes.rows, attributes.cols, null, null]
     if attributes.width?
-      divider = if @isFlatTopped() then 2 / (2 * @cols + 1) else 1 / @cols
+      divider = if @isFlatTopped() then 2 / (2 * cols + 1) else 1 / cols
       width = round attributes.width * divider
     if attributes.height?
-      divider = if @isFlatTopped() then 1 / @rows else 2 / (2 * @rows + 1)
+      divider = if @isFlatTopped() then 1 / rows else 2 / (2 * rows + 1)
       height = round attributes.height * divider
     { width, height }
 

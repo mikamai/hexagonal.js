@@ -73,18 +73,18 @@ describe 'Hexagon', ->
 
     describe 'when only width is provided in size', ->
       describe 'and flatTopped is false', ->
-        it 'desumes height multiplying width by a coefficient', ->
+        it 'detects height multiplying width by a coefficient', ->
           expect(Subject.bySize(width: 1).size()).toEqual new Size 1, 1.2
       describe 'and flatTopped is true', ->
-        it 'desumes height dividing width by a coefficient', ->
+        it 'detects height dividing width by a coefficient', ->
           expect(Subject.bySize({ width: 1 }, flatTopped: true).size()).toEqual new Size 1, 0.9
 
     describe 'when only height is provided in size', ->
       describe 'and flatTopped is false', ->
-        it 'desumes width dividing height by a coefficient', ->
+        it 'detects width dividing height by a coefficient', ->
           expect(Subject.bySize(height: 1).size()).toEqual new Size 0.9, 1
       describe 'and flatTopped is true', ->
-        it 'desumes width multiplying height by a coefficient', ->
+        it 'detects width multiplying height by a coefficient', ->
           expect(Subject.bySize({ height: 1 }, flatTopped: true).size()).toEqual new Size 1.2, 1
 
   describe '::byVertices', ->
@@ -95,7 +95,7 @@ describe 'Hexagon', ->
     it 'throws an error if the vertices attribute has not 6 items', ->
       expect(-> Subject.byVertices vertices.slice(1)).toThrowError 'You have to provide 6 vertices'
 
-    it 'desumes edges using the provided vertices', ->
+    it 'detects edges using the provided vertices', ->
       expect(Subject.byVertices(vertices).halfEdges).toEqual [
         new HalfEdge(new Edge [vertices[0], vertices[1]]),
         new HalfEdge(new Edge [vertices[1], vertices[2]]),
@@ -199,7 +199,7 @@ describe 'Hexagon', ->
     it 'returns a point', ->
       expect(subject.center().constructor).toEqual Hexagonal.Point
 
-    it 'is desumed using position and size', ->
+    it 'is detected using position and size', ->
       subject = Subject.bySize { width: 2, height: 2}, position: { x: 1, y: 2 }
       expect(subject.center()).toEqual new Point 2, 3
 
@@ -208,13 +208,13 @@ describe 'Hexagon', ->
       subject = Subject.bySize width: 10
       expect(subject.size().constructor).toEqual Hexagonal.Size
 
-    it 'is desumed using the first vertex x and the position', ->
+    it 'is detected using the first vertex x and the position', ->
       subject = Subject.bySize width: 10
       spyOn(subject, 'position').and.returnValue x: 10, y: 10
       subject.vertices()[0].x = 100
       expect(subject.size().width).toEqual 90
 
-    it 'is desumed using the second vertex y and the position', ->
+    it 'is detected using the second vertex y and the position', ->
       subject = Subject.bySize width: 10
       spyOn(subject, 'position').and.returnValue x: 10, y: 10
       subject.vertices()[1].y = 100
