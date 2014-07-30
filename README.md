@@ -13,16 +13,16 @@ An hexagon can be inscribed in a circle, so you can create one passing the
 circumference radius and, optionally, the circumference center:
 
 ```javascript
-# Regular hexagon inscribed in a circle with center in 5,5 and a radius of 10
+// Regular hexagon inscribed in a circle with center in 5,5 and a radius of 10
 hexagon = Hexagonal.Hexagon.byRadius 10, center: { x: 5, y: 5 }
 ```
 
 You can create an hexagon with a given size:
 
 ```javascript
-# Regular hexagon with a height of 10 and width of 10 * sqrt(3)/2
+// Regular hexagon with a height of 10 and width of 10 * sqrt(3)/2
 hexagon = Hexagonal.Hexagon.bySize { height: 10 }
-# Hexagon with a width of 10 and a height of 5
+// Hexagon with a width of 10 and a height of 5
 hexagon = Hexagonal.Hexagon.bySize { width: 10, height: 5 }
 ```
 
@@ -30,7 +30,7 @@ Both the methods above will create the vertices collections.
 But if you want you can create an hexagon passing your custom vertices:
 
 ```javascript
-# A weird hexagonal polygon
+// A weird hexagonal polygon
 vertices = (new Hexagonal.Vertex(i*5, i*10) for i in [0...6])
 hexagon = Hexagonal.Hexagon.byVertices vertices
 ```
@@ -43,18 +43,18 @@ To each of the methods described above you can pass additional options to custom
 ### Hexagonal Map
 
 ```javascript
-# map of 10x10 composed by regular hexagons with a width of 10
+// map of 10x10 composed by regular hexagons with a width of 10
 new Hexagonal.Map({cols: 10, rows: 10, hexagon: { width: 10 }})
-# map of 10x10 composed by hexagons with a size of 2x3
+// map of 10x10 composed by hexagons with a size of 2x3
 new Hexagonal.Map({cols: 10, rows: 10, hexagon: { width: 2, height: 3 }})
-# map of 10x10 composed by regular hexagons inscribed in a circumference with
-# a radius of 10
+// map of 10x10 composed by regular hexagons inscribed in a circumference with
+// a radius of 10
 new Hexagonal.Map({cols: 10, rows: 10, hexagon: { radius: 10 }})
-# map of 10x10 with a total width of 500. The total width will be divided by
-# cols to obtain each hexagon width
+// map of 10x10 with a total width of 500. The total width will be divided by
+// cols to obtain each hexagon width
 new Hexagonal.Map({cols: 10, rows: 10, width: 500})
-# map of 10x10 with a total width of 500 and a total height of 500. The total
-# width and height will be divided by cols and rows to obtain each hexagon size
+// map of 10x10 with a total width of 500 and a total height of 500. The total
+// width and height will be divided by cols and rows to obtain each hexagon size
 new Hexagonal.Map({cols: 10, rows: 10, width: 500, height: 500})
 ```
 
@@ -69,34 +69,34 @@ Once you have the map, you can choose which Cursor you want to use to navigate i
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
-cursor = new Hexagonal.Cursors.Offset(map, 0, 0) # offset cursor, set in 0,0 (first hexagon)
-cursor.moveTo(2, 2) # move to the center and returns the current hexagon
-cursor.hexagon # => returns the current hexagon
+cursor = new Hexagonal.Cursors.Offset(map, 0, 0) // offset cursor, set in 0,0 (first hexagon)
+cursor.moveTo(2, 2) // move to the center and returns the current hexagon
+cursor.hexagon // => returns the current hexagon
 ```
 
 #### Axial Cursor
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
-cursor = new Hexagonal.Cursors.Axial(map, 0, 0) # offset cursor, set in 0,0 (map center)
-cursor.moveTo(2, 2) # move to the last hexagon of the map and returns the current hexagon
-cursor.hexagon # => returns the current hexagon
+cursor = new Hexagonal.Cursors.Axial(map, 0, 0) // offset cursor, set in 0,0 (map center)
+cursor.moveTo(2, 2) // move to the last hexagon of the map and returns the current hexagon
+cursor.hexagon // => returns the current hexagon
 ```
 
 #### Cube Cursor
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
-cursor = new Hexagonal.Cursors.Cube(map, 0, 0, 0) # offset cursor, set in 0,0,0 (map center)
-cursor.moveTo(2, -4, 2) # move to the last hexagon of the map and returns the current hexagon
-cursor.hexagon # => returns the current hexagon
+cursor = new Hexagonal.Cursors.Cube(map, 0, 0, 0) // offset cursor, set in 0,0,0 (map center)
+cursor.moveTo(2, -4, 2) // move to the last hexagon of the map and returns the current hexagon
+cursor.hexagon // => returns the current hexagon
 ```
 
 Cursors can be easily converted back and forth passing the current cursor to the new one's constructor:
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
-cube = new Hexagonal.Cursors.Cube({map, 0, 0, 0}) # offset cursor, set in 0,0,0 (map center)
+cube = new Hexagonal.Cursors.Cube({map, 0, 0, 0}) // offset cursor, set in 0,0,0 (map center)
 offset = new Hexagonal.Cursors.Offset(cube)
 axial = new Hexagonal.Cursors.Axial(cube)
 ```
@@ -108,10 +108,10 @@ rounded to 1 decimal digit. If you want to change it, you can set how many decim
 digits to use:
 
 ```javascript
-Hexagonal.precision() # => 1
-Hexagonal.Util.round(3.123) # => 3.1
+Hexagonal.precision() // => 1
+Hexagonal.Util.round(3.123) // => 3.1
 Hexagonal.precision(2)
-Hexagonal.Util.round(3.12) # => 3.12
+Hexagonal.Util.round(3.12) // => 3.12
 ```
 
 ## Tests
