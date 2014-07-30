@@ -7,7 +7,7 @@ class OffsetCursor
       @moveTo mapOrCursor.offsetPosition()
     else
       @map = mapOrCursor
-      @moveTo @_extractPoint(args)
+      @moveTo @_extractOffset(args)
 
   moveTo: ->
     @position = @_extractOffset(arguments)
