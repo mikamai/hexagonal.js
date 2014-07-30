@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <title>Hexagonal Demos</title>
+    <style>
+      .demo .preview, .demo .doc {
+        display: inline-block;
+        vertical-align: top;
+      }
+    </style>
+    <script type="text/javascript" src="./build/hexagonal.js"></script>
+    <script type="text/javascript">
+      var simpleUsage = function() {
+        var canvas = document.getElementById('simple-usage'),
+            map    = new Hexagonal.Map({rows: 10, cols: 14, width: canvas.width}),
+            ctx    = canvas.getContext('2d');
+        canvas.height = map.size().height;
+        map.hexagons().forEach(function(hexagon) {
+          var vertex = hexagon.halfEdges[0].va();
+          ctx.beginPath();
+          ctx.moveTo(vertex.x, vertex.y);
+          hexagon.halfEdges.forEach(function(halfEdge) {
+            ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+          });
+          ctx.closePath();
+          ctx.stroke();
+        });
+        window.map = map;
+      };
+    </script>
+  </head>
+  <body>
+    <section class="demo">
+      <h2>Simple Usage</h2>
+      <section class="doc">
+        <pre><code class="javascript">
+var canvas = document.getElementById('simple-usage'),
+    map    = new Hexagonal.Map({rows: 10, cols: 14, width: canvas.width}),
+    ctx    = canvas.getContext('2d');
+canvas.height = map.size().height;
+map.hexagons().forEach(function(hexagon) {
+  var vertex = hexagon.halfEdges[0].va();
+  ctx.beginPath();
+  ctx.moveTo(vertex.x, vertex.y);
+  hexagon.halfEdges.forEach(function(halfEdge) {
+    ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+  });
+  ctx.closePath();
+  ctx.stroke();
+});
+        </code></pre>
+      </section>
+      <section class="preview">
+        <canvas id="simple-usage" width="512"></canvas>
+      </section>
+    </section>
+    <script type="text/javascript">
+      simpleUsage();
+    </script>
+  </body>
+</html>
