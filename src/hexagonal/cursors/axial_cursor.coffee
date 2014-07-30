@@ -1,12 +1,26 @@
 Point = require '../core/point.coffee'
 
 class AxialCursor
-  constructor: (@map, args...) ->
-    @moveTo @_extractPoint(args)
+  constructor: (mapOrCursor, args...)->
+    if mapOrCursor.axialPosition
+      @map = mapOrCursor.map
+      @moveTo mapOrCursor.axialPosition()
+    else
+      @map = mapOrCursor
+      @moveTo @_extractPoint(args)
 
   moveTo: ->
-    point = @_centerPoint().sum @_extractPoint(arguments)
+    @position = @_extractPoint(arguments)
+    point = @_centerPoint().sum @position
     @hexagon = @map.matrix[point.y]?[point.x]
+
+  axialPosition: -> @position
+
+  cubePosition: ->
+    { x: @position.x, y: -(@position.x + @position.y), z: @position.y}
+
+  offsetPosition: ->
+    @_centerPoint().sum @position
 
   _centerPoint: ->
     return @_center if @_center?
