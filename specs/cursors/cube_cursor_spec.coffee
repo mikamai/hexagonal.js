@@ -11,6 +11,10 @@ describe 'CubeCursor', ->
   it 'uses <-cols / 2>,<cols/2+rows/2>,<-rows / 2> as first hexagon', ->
     expect(new Subject(map, -2, 4, -2).hexagon).toBe map.firstHexagon()
 
+  it 'returns null if coordinates triple is not correct', ->
+    subject = new Subject(map, -2, -4, -2)
+    expect(subject.position).toBeNull()
+
   it 'allows a point to be passed', ->
     expect(new Subject(map, x: 2, y: -4, z: 2).hexagon).toBe map.lastHexagon()
 
@@ -20,11 +24,11 @@ describe 'CubeCursor', ->
     .toThrowError()
 
   it 'can be easily be converted into an offset cursor', ->
-    subject = new Subject(map, x: -2, y: -4, z: 2)
+    subject = new Subject(map, x: 2, y: -4, z: 2)
     offset  = new Hexagonal.Cursors.OffsetCursor(map, subject.offsetPosition())
     expect(offset.hexagon).toBe subject.hexagon
 
   it 'can be easily be converted into an axial cursor', ->
-    subject = new Subject(map, x: -2, y: -4, z: 2)
+    subject = new Subject(map, x: 2, y: -4, z: 2)
     offset  = new Hexagonal.Cursors.AxialCursor(map, subject.axialPosition())
     expect(offset.hexagon).toBe subject.hexagon
