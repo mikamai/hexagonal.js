@@ -112,6 +112,7 @@ Hexagonal.precision() // => 1
 Hexagonal.Util.round(3.123) // => 3.1
 Hexagonal.precision(2)
 Hexagonal.Util.round(3.12) // => 3.12
+Hexagonal.precision(null) // => disable rounding
 ```
 
 ## Tests

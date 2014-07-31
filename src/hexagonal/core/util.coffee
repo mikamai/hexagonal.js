@@ -8,5 +8,8 @@ module.exports =
       precision
 
   round: (value) ->
-    divider = Math.pow 10, precision
-    Math.round(value * divider) / divider
+    if precision?
+      divider = Math.pow 10, precision
+      Math.round(value * divider) / divider
+    else
+      value
