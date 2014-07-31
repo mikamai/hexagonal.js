@@ -38,7 +38,9 @@ class CubeCursor
       obj = args[0]
       if obj.x? or obj.y? or obj.z?
         obj
-      else
-        throw new Error "Bad arg for @at. You can call .at(x, y, z), .at(x: x, y: y, z: z)"
+      else if obj.__position
+        center = @_centerPoint()
+        axial = new Point(obj.__position).sub {x: center.x, y: center.z}
+        { x: axial.x, y: -(axial.x + axial.y), z: axial.y}
 
 module.exports = CubeCursor

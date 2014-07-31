@@ -16,7 +16,7 @@ describe 'Map', ->
 
   sharedVerticesCheck = (point, destVertices, sourceVertices) ->
     (hexagon, o) ->
-      neighbor = subject.at o.c + (point.c ? 0), o.r + (point.r ? 0)
+      neighbor = subject.matrix[o.r + (point.r ? 0)][o.c + (point.c ? 0)]
       [vertices, nVertices] = [hexagon.vertices(), neighbor.vertices()]
       for destVertexIdx, index in destVertices
         srcVertexIdx = sourceVertices[index]
@@ -24,7 +24,7 @@ describe 'Map', ->
 
   sharedEdgeCheck = (point, destEdgeIdx, srcEdgeIdx) ->
     (hexagon, o) ->
-      neighbor = subject.at o.c + (point.c ? 0), o.r + (point.r ? 0)
+      neighbor = subject.matrix[o.r + (point.r ? 0)][o.c + (point.c ? 0)]
       [halfEdges, nHalfEdges] = [hexagon.halfEdges, neighbor.halfEdges]
       expect(halfEdges[destEdgeIdx].edge).toBe nHalfEdges[srcEdgeIdx].edge
 
@@ -129,7 +129,7 @@ describe 'Map', ->
         describe 'and width and height are passed', ->
           it 'detects each hexagon size', ->
             subject = new Subject width: 55, height: 102, cols: 5, rows: 6
-            expect(subject.at(0, 0).size()).toEqual new Size 10, 21.5
+            expect(subject.matrix[0][0].size()).toEqual new Size 10, 21.5
           itBehavesLikeAPointlyToppedMap width: 55, height: 102, cols: 5, rows: 6
 
       describe '#size.width', ->
@@ -221,7 +221,7 @@ describe 'Map', ->
         describe 'and width and height are passed', ->
           it 'detects each hexagon size', ->
             subject = new Subject width: 55, height: 102, cols: 5, rows: 6, flatTopped: true
-            expect(subject.at(0, 0).size()).toEqual new Size 13.8, 15.7
+            expect(subject.matrix[0][0].size()).toEqual new Size 13.8, 15.7
           itBehavesLikeAFlatToppedMap width: 55, height: 102, cols: 5, rows: 6
 
       describe '#size.width', ->

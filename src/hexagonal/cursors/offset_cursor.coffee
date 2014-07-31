@@ -36,7 +36,7 @@ class OffsetCursor
         obj
       else if obj.i? or obj.j?
         new Point obj.i, obj.j
-      else
-        throw new Error "Bad arg for @at. You can call .at(x, y), .at(x: x, y: y) or .at(i: x, j: y)"
+      else if obj.__position?
+        obj.__position
 
 module.exports = OffsetCursor

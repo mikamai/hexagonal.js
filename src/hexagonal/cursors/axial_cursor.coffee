@@ -36,7 +36,7 @@ class AxialCursor
       obj = args[0]
       if obj.x? or obj.y?
         obj
-      else
-        throw new Error "Bad arg for @at. You can call .at(x, y), .at(x: x, y: y)"
+      else if obj.__position?
+        new Point(obj.__position).sub @_centerPoint()
 
 module.exports = AxialCursor

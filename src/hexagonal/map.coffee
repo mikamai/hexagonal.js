@@ -72,7 +72,10 @@ class HexagonMatrixFactory
   _createHexagonInOffset: (i, j) ->
     position = @_expectedPositionInOffset i, j
     halfEdges = @halfEdgesFromNeighborhood i, j
-    new Hexagon halfEdges, flatTopped: @isFlatTopped()
+    hexagon = new Hexagon halfEdges, flatTopped: @isFlatTopped()
+    hexagon.__map = @
+    hexagon.__position = {x: i, y: j}
+    hexagon
 
   _expectedPositionInOffset: (i, j) ->
     if @isFlatTopped()
@@ -147,8 +150,6 @@ class Map
   size: ->
     lastHexPos = @lastHexagon().position()
     @lastHexagon().size().sum width: lastHexPos.x, height: lastHexPos.y
-
-  at: (i, j) -> @matrix[j]?[i]
 
   _detectedHexagonSize: (attributes) =>
     throw new Error "Cannot detect correct hexagon size" unless attributes.width? or attributes.height?
