@@ -10,21 +10,113 @@
     <script type="text/javascript" src="./hexagonal.js"></script>
     <script type="text/javascript">
       var simpleUsage = function() {
-        var canvas = document.getElementById('simple-usage'),
-            map    = new Hexagonal.Map({rows: 10, cols: 14, width: canvas.width}),
-            ctx    = canvas.getContext('2d');
-        canvas.height = map.size().height;
-        map.hexagons().forEach(function(hexagon) {
-          var vertex = hexagon.halfEdges[0].va();
-          ctx.beginPath();
-          ctx.moveTo(vertex.x, vertex.y);
-          hexagon.halfEdges.forEach(function(halfEdge) {
-            ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
-          });
-          ctx.closePath();
-          ctx.stroke();
-        });
-      };
+                          var canvas = document.getElementById('simple-usage'),
+                              ctx    = canvas.getContext('2d'),
+                              map    = new Hexagonal.Map({rows: 10, cols: 14, width: canvas.width});
+                          canvas.height = map.size().height;
+                          map.hexagons().forEach(function(hexagon) {
+                            var vertex = hexagon.halfEdges[0].va();
+                            ctx.beginPath();
+                            ctx.moveTo(vertex.x, vertex.y);
+                            hexagon.halfEdges.forEach(function(halfEdge) {
+                              ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+                            });
+                            ctx.closePath();
+                            ctx.stroke();
+                          });
+                        },
+          wrapAround = function() {
+                          var canvas = document.getElementById('wrap-around'),
+                              ctx    = canvas.getContext('2d'),
+                              map    = new Hexagonal.Map({rows: 3, cols: 3, hexagon: {width: 48}}),
+                              mapCanvas    = document.createElement('canvas'),
+                              mapCanvasCtx = mapCanvas.getContext('2d');
+                          map.hexagons().forEach(function(hexagon) {
+                            var vertex = hexagon.halfEdges[0].va();
+                            mapCanvasCtx.beginPath();
+                            mapCanvasCtx.moveTo(vertex.x, vertex.y);
+                            hexagon.halfEdges.forEach(function(halfEdge) {
+                              mapCanvasCtx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+                            });
+                            mapCanvasCtx.closePath();
+                            mapCanvasCtx.stroke();
+                          });
+                          ctx.drawImage(mapCanvas, 0, 0);
+                          ctx.drawImage(mapCanvas, map.size().width, 0);
+          },
+          offsetCursor = function() {
+                          var canvas = document.getElementById('offset-cursor'),
+                              ctx    = canvas.getContext('2d'),
+                              map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+                              cursor = new Hexagonal.Cursors.OffsetCursor(map, 0, 0);
+                          canvas.height = map.size().height;
+                          ctx.font = "14px Verdana";
+                          ctx.textAlign = 'center';
+                          map.hexagons().forEach(function(hexagon) {
+                            var vertex = hexagon.halfEdges[0].va(),
+                                center = hexagon.center();
+                            ctx.beginPath();
+                            ctx.moveTo(vertex.x, vertex.y);
+                            hexagon.halfEdges.forEach(function(halfEdge) {
+                              ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+                            });
+                            ctx.closePath();
+                            ctx.stroke();
+                            cursor.moveTo(hexagon);
+                            ctx.fillText(cursor.position.x + "," + cursor.position.y, center.x, center.y + 6);
+                          });
+          },
+          axialCursor = function() {
+                          var canvas = document.getElementById('axial-cursor'),
+                              ctx    = canvas.getContext('2d'),
+                              map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+                              cursor = new Hexagonal.Cursors.AxialCursor(map, 0, 0);
+                          canvas.height = map.size().height;
+                          ctx.font = "14px Verdana";
+                          ctx.textAlign = 'center';
+                          map.hexagons().forEach(function(hexagon) {
+                            var vertex = hexagon.halfEdges[0].va(),
+                                center = hexagon.center();
+                            ctx.beginPath();
+                            ctx.moveTo(vertex.x, vertex.y);
+                            hexagon.halfEdges.forEach(function(halfEdge) {
+                              ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+                            });
+                            ctx.closePath();
+                            ctx.stroke();
+                            cursor.moveTo(hexagon);
+                            ctx.fillText(cursor.position.x + "," + cursor.position.y, center.x, center.y + 6);
+                          });
+          },
+          cubeCursor = function() {
+                          var canvas = document.getElementById('cube-cursor'),
+                              ctx    = canvas.getContext('2d'),
+                              map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+                              cursor = new Hexagonal.Cursors.CubeCursor(map, 0, 0, 0);
+                          canvas.height = map.size().height;
+                          ctx.font = "10px Verdana";
+                          ctx.textAlign = 'center';
+                          map.hexagons().forEach(function(hexagon) {
+                            var vertex = hexagon.halfEdges[0].va(),
+                                center = hexagon.center();
+                            ctx.beginPath();
+                            ctx.moveTo(vertex.x, vertex.y);
+                            hexagon.halfEdges.forEach(function(halfEdge) {
+                              ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+                            });
+                            ctx.closePath();
+                            ctx.stroke();
+                            cursor.moveTo(hexagon);
+                            values = [cursor.position.x, cursor.position.y, cursor.position.z];
+                            if (values[0] == 0 && values[1] == 0 && values[2] == 0) { values = ['x', 'y', 'z']; }
+                            ctx.fillStyle = 'green';
+                            ctx.fillText(values[0], hexagon.vertices()[5].x - 8, hexagon.vertices()[5].y + 8);
+                            ctx.fillStyle = 'red';
+                            ctx.fillText(values[1], hexagon.vertices()[3].x + 8, hexagon.vertices()[3].y + 8);
+                            ctx.fillStyle = 'blue';
+                            ctx.fillText(values[2], hexagon.vertices()[1].x, hexagon.vertices()[1].y - 8);
+                          });
+          };
     </script>
   </head>
   <body>
@@ -52,8 +144,129 @@ map.hexagons().forEach(function(hexagon) {
         <canvas id="simple-usage" width="512"></canvas>
       </section>
     </section>
+    <section class="demo">
+      <h2>Wraparound</h2>
+      <section class="doc">
+        <pre><code class="javascript">
+var canvas = document.getElementById('wrap-around'),
+    ctx    = canvas.getContext('2d'),
+    map    = new Hexagonal.Map({rows: 3, cols: 3, hexagon: {width: 48}}),
+    mapCanvas    = document.createElement('canvas'),
+    mapCanvasCtx = mapCanvas.getContext('2d');
+map.hexagons().forEach(function(hexagon) {
+  var vertex = hexagon.halfEdges[0].va();
+  mapCanvasCtx.beginPath();
+  mapCanvasCtx.moveTo(vertex.x, vertex.y);
+  hexagon.halfEdges.forEach(function(halfEdge) {
+    mapCanvasCtx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+  });
+  mapCanvasCtx.closePath();
+  mapCanvasCtx.stroke();
+});
+ctx.drawImage(mapCanvas, 0, 0);
+ctx.drawImage(mapCanvas, map.size().width, 0);
+        </code></pre>
+      </section>
+      <section class="preview">
+        <canvas id="wrap-around" width="512"></canvas>
+      </section>
+    </section>
+    <section class="demo">
+      <h2>Offset Cursor</h2>
+      <section class="doc">
+        <pre><code class="javascript">
+var canvas = document.getElementById('offset-cursor'),
+    ctx    = canvas.getContext('2d'),
+    map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+    cursor = new Hexagonal.Cursors.OffsetCursor(map, 0, 0);
+canvas.height = map.size().height;
+ctx.font = "18px Verdana";
+ctx.textAlign = 'center';
+map.hexagons().forEach(function(hexagon) {
+  var vertex = hexagon.halfEdges[0].va(),
+      center = hexagon.center();
+  ctx.beginPath();
+  ctx.moveTo(vertex.x, vertex.y);
+  hexagon.halfEdges.forEach(function(halfEdge) {
+    ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+  });
+  ctx.closePath();
+  ctx.stroke();
+  cursor.moveTo(hexagon);
+  ctx.fillText(cursor.position.x + "," + cursor.position.y, center.x, center.y + 6);
+});
+        </code></pre>
+      </section>
+      <section class="preview">
+        <canvas id="offset-cursor" width="512"></canvas>
+      </section>
+    </section>
+    <section class="demo">
+      <h2>Axial Cursor</h2>
+      <section class="doc">
+        <pre><code class="javascript">
+var canvas = document.getElementById('axial-cursor'),
+    ctx    = canvas.getContext('2d'),
+    map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+    cursor = new Hexagonal.Cursors.AxialCursor(map, 0, 0);
+canvas.height = map.size().height;
+ctx.font = "14px Verdana";
+ctx.textAlign = 'center';
+map.hexagons().forEach(function(hexagon) {
+  var vertex = hexagon.halfEdges[0].va(),
+      center = hexagon.center();
+  ctx.beginPath();
+  ctx.moveTo(vertex.x, vertex.y);
+  hexagon.halfEdges.forEach(function(halfEdge) {
+    ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+  });
+  ctx.closePath();
+  ctx.stroke();
+  cursor.moveTo(hexagon);
+  ctx.fillText(cursor.position.x + "," + cursor.position.y, center.x, center.y + 6);
+});
+        </code></pre>
+      </section>
+      <section class="preview">
+        <canvas id="axial-cursor" width="512"></canvas>
+      </section>
+    </section>
+    <section class="demo">
+      <h2>Cube Cursor</h2>
+      <section class="doc">
+        <pre><code class="javascript">
+var canvas = document.getElementById('axial-cursor'),
+    ctx    = canvas.getContext('2d'),
+    map    = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 24 }}),
+    cursor = new Hexagonal.Cursors.AxialCursor(map, 0, 0);
+canvas.height = map.size().height;
+ctx.font = "14px Verdana";
+ctx.textAlign = 'center';
+map.hexagons().forEach(function(hexagon) {
+  var vertex = hexagon.halfEdges[0].va(),
+      center = hexagon.center();
+  ctx.beginPath();
+  ctx.moveTo(vertex.x, vertex.y);
+  hexagon.halfEdges.forEach(function(halfEdge) {
+    ctx.lineTo(halfEdge.vb().x, halfEdge.vb().y);
+  });
+  ctx.closePath();
+  ctx.stroke();
+  cursor.moveTo(hexagon);
+  ctx.fillText(cursor.position.x + "," + cursor.position.y, center.x, center.y + 6);
+});
+        </code></pre>
+      </section>
+      <section class="preview">
+        <canvas id="cube-cursor" width="512"></canvas>
+      </section>
+    </section>
     <script type="text/javascript">
       simpleUsage();
+      wrapAround();
+      offsetCursor();
+      axialCursor();
+      cubeCursor();
     </script>
   </body>
 </html>
