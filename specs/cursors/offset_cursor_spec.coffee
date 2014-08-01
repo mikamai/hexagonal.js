@@ -24,11 +24,11 @@ describe 'OffsetCursor', ->
     expect ->
       new Subject(map, 'asd')
     .toThrowError()
-
-  it 'can be easily be converted into a cube cursor', ->
-    subject = new Subject(map, 4, 4)
-    offset  = new Hexagonal.Cursors.CubeCursor(map, subject.cubePosition())
-    expect(offset.hexagon).toBe subject.hexagon
+  # 
+  # it 'can be easily be converted into a cube cursor', ->
+  #   subject = new Subject(map, 4, 4)
+  #   offset  = new Hexagonal.Cursors.CubeCursor(map, subject.cubePosition())
+  #   expect(offset.hexagon).toBe subject.hexagon
 
   it 'can be easily be converted into an axial cursor', ->
     subject = new Subject(map, 4, 4)
