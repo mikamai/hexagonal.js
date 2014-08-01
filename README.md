@@ -83,22 +83,21 @@ cursor.moveTo(2, 2) // move to the last hexagon of the map and returns the curre
 cursor.hexagon // => returns the current hexagon
 ```
 
-#### Cube Cursor
+<!-- #### Cube Cursor
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
 cursor = new Hexagonal.Cursors.Cube(map, 0, 0, 0) // offset cursor, set in 0,0,0 (map center)
 cursor.moveTo(2, -4, 2) // move to the last hexagon of the map and returns the current hexagon
 cursor.hexagon // => returns the current hexagon
-```
+``` -->
 
 Cursors can be easily converted back and forth passing the current cursor to the new one's constructor:
 
 ```javascript
 map = new Hexagonal.Map({rows: 5, cols: 5, hexagon: { radius: 5 }})
-cube = new Hexagonal.Cursors.Cube({map, 0, 0, 0}) // offset cursor, set in 0,0,0 (map center)
-offset = new Hexagonal.Cursors.Offset(cube)
-axial = new Hexagonal.Cursors.Axial(cube)
+offset = new Hexagonal.Cursors.Offset(map, 0, 0)
+axial = new Hexagonal.Cursors.Axial(offset)
 ```
 
 ### Precision
